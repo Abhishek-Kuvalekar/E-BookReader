@@ -6,24 +6,24 @@ This application is developed as Software Engineering Project by TY Engineering 
 
 # Core Features:
 
-    Reading PDF and EPUB files
-    Normal Mode and Reading Mode
-    Zoom in and zoom out
-    Text Highlighting
-    Annotating
-    Bookmarks
-    Page wise and chapter wise navigation
-    Pattern Search
+    1.Reading PDF and EPUB files
+    2.Normal Mode and Reading Mode
+    3.Zoom in and zoom out
+    4.Text Highlighting
+    5.Annotating
+    6.Bookmarks
+    7.Page wise and chapter wise navigation
+    8.Pattern Search
 
 # Additional Features:
 
-    Changing font type and size
-    Adjusting brightness
-    Night Mode
-    In-built dictionary and online lookup facility
-    Text-to-speech conversion
+    1.Changing font type and size
+    2.Adjusting brightness
+    3.Night Mode
+    4.In-built dictionary and online lookup facility
+    5.Text-to-speech conversion
 
 # Specifications:
 
-    Android Version: Android Marshmallow(Android 6.0)
-    API Level: API 23
+    1.Android Version: Android Marshmallow(Android 6.0)
+    2.API Level: API 23
