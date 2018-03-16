@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,29 +19,34 @@ import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 import java.util.regex.Pattern;
 
 public class FileChooserActivity extends AppCompatActivity {
-    public Button button;
+    public static final String FILE_NAME = "in.org.coep.se.filechooseractivity.file_name";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_file_chooser);
+        //setContentView(R.layout.activity_file_chooser);
 
-
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2001);
-        }
-        button = (Button) findViewById(R.id.button1);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new MaterialFilePicker()
-                        .withActivity(FileChooserActivity.this)
-                        .withRequestCode(2000)
-                        .withHiddenFiles(true) // Show hidden files and folders
-                        .start();
-
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 2001);
+            }else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 2001);
             }
-        });
+        }
+
+        new MaterialFilePicker()
+                .withActivity(FileChooserActivity.this)
+                .withRequestCode(2000)
+                .withFilter(Pattern.compile(".*\\.pdf$")) // Filtering files and directories by file name using regexp
+                .withHiddenFiles(true) // Show hidden files and folders
+                .start();
+
+    }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        finish();
     }
 
     @Override
@@ -50,7 +56,10 @@ public class FileChooserActivity extends AppCompatActivity {
         if (requestCode == 2000 && resultCode == RESULT_OK) {
             String filePath = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
             // Do anything with file
-            Toast.makeText(this, filePath, Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, FileRendererActivity.class);
+            intent.putExtra(FILE_NAME, filePath);
+            startActivity(intent);
+            //Toast.makeText(this, filePath, Toast.LENGTH_SHORT).show();
         }
     }
 
