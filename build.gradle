@@ -22,9 +22,11 @@ allprojects {
         maven {
             url  "http://dl.bintray.com/lukaville/maven"
         }
+        maven {
+            url "http://dl.bintray.com/mobisystech/maven"
+        }
     }
 }
-
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

@@ -37,7 +37,7 @@ public class FileChooserActivity extends AppCompatActivity {
         new MaterialFilePicker()
                 .withActivity(FileChooserActivity.this)
                 .withRequestCode(2000)
-                .withFilter(Pattern.compile(".*\\.pdf$")) // Filtering files and directories by file name using regexp
+                .withFilter(Pattern.compile(".*\\.epub$")) // Filtering files and directories by file name using regexp
                 .withHiddenFiles(true) // Show hidden files and folders
                 .start();
 
@@ -56,10 +56,11 @@ public class FileChooserActivity extends AppCompatActivity {
         if (requestCode == 2000 && resultCode == RESULT_OK) {
             String filePath = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
             // Do anything with file
+            Toast.makeText(this, filePath, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, FileRendererActivity.class);
             intent.putExtra(FILE_NAME, filePath);
             startActivity(intent);
-            //Toast.makeText(this, filePath, Toast.LENGTH_SHORT).show();
+
         }
     }
 

@@ -6,10 +6,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.folioreader.util.FolioReader;
 import com.github.barteksc.pdfviewer.PDFView;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,16 +52,8 @@ public class FileRendererActivity extends AppCompatActivity {
                 .linkHandler(DefaultLinkHandler)
                 .pageFitPolicy(FitPolicy.WIDTH)
                 .load();*/
-        File file = new File(fileName);
-        try {
-            PDDocument document = PDDocument.load(file);
-            PDFTextStripper pdfStripper = new PDFTextStripper();
-            String text = pdfStripper.getText(document);
-            Log.d("file", text);
-            document.close();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        UnzipEpub epub = new UnzipEpub(fileName);
     }
+
 }
