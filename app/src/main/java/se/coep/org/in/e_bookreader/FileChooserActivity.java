@@ -37,7 +37,10 @@ public class FileChooserActivity extends AppCompatActivity {
         new MaterialFilePicker()
                 .withActivity(FileChooserActivity.this)
                 .withRequestCode(2000)
-                .withFilter(Pattern.compile(".*\\.pdf$")) // Filtering files and directories by file name using regexp
+                .withFilter(Pattern.compile(".*\\.xml$"))
+                /*.withFilter(Pattern.compile(".*\\.ncx$"))
+                .withFilter(Pattern.compile(".*\\.opf$"))
+                .withFilter(Pattern.compile(".*\\.pdf$"))*/// Filtering files and directories by file name using regexp
                 .withHiddenFiles(true) // Show hidden files and folders
                 .start();
 
