@@ -5,16 +5,23 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+
+//import com.folioreader.util.FolioReader;
+//import com.github.barteksc.pdfviewer.PDFView;
+
 
 //import com.github.barteksc.pdfviewer.PDFView;
 
 /*import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.PDFTextStripper;*/
+
 
 import java.io.File;
 import java.io.IOException;
@@ -59,26 +66,12 @@ public class FileRendererActivity extends AppCompatActivity {
                 .linkHandler()
                 .pageFitPolicy(FitPolicy.WIDTH)
                 .load();*/
-        //final File file = new File(fileName);
-        /*Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    PDDocument document = PDDocument.load(file);
-                    PDFTextStripper pdfStripper = new PDFTextStripper();
-                    String text = pdfStripper.getText(document);
-                    Log.d("FILE: ", text);
-                    //Toast.makeText(FileRendererActivity.this, text, Toast.LENGTH_LONG).show();
-                    document.close();
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        thread.start();*/
-        WebView webView = (WebView) findViewById(R.id.webview);
-        Log.d("FILE", fileName);
-        webView.loadUrl(String.valueOf(Uri.fromFile(new File(fileName))));
+        if(fileName.endsWith("epub")) {
+            EpubFile file = new EpubFile(fileName);
+            file.getContent(this);
+            file.open(this, this.getWindow().getDecorView());
+        }
     }
+
 }
