@@ -4,12 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="se.coep.org.in.e_bookreader.FileRendererActivity">
+    tools:context="se.coep.org.in.e_bookreader.FileRendererActivity"
+    android:id = "@+id/fileShower"
+    android:orientation="vertical">
 
-    <com.github.barteksc.pdfviewer.PDFView
+    <!--<com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/pdfView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible" />
+        android:visibility="visible" />-->
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/webview"></WebView>
 
 </LinearLayout>
