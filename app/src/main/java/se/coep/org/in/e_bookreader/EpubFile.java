@@ -118,6 +118,7 @@ public class EpubFile {
                 "/" + contents.get(currentChapter);
         return path;
     }
+
     public void open(final Context context, View view) {
         final WebView webView = (WebView) view.findViewById(R.id.webview);
         webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
@@ -131,20 +132,20 @@ public class EpubFile {
             public void onSwipeLeft() {
                 if(currentChapter != contents.size()) {
                     currentChapter++;
+                    webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
                 }
                 else {
                     Toast.makeText(context, "End of the book", Toast.LENGTH_SHORT).show();
                 }
-                webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
             }
             public void onSwipeRight() {
                 if(currentChapter != 0) {
                     currentChapter--;
+                    webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
                 }
                 else {
                     Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
                 }
-                webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
             }
         });
     }
