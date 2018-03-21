@@ -34,13 +34,16 @@ public class EpubFile {
     private List<String> contents;
     private String unzippedDir;
     private int currentChapter;
+    private Context context;
+    private View view;
 
-    public EpubFile(String fileName) {
+    public EpubFile(String fileName, Context context) {
+        this.context = context;
         this.fileName = fileName;
         currentChapter = 0;
     }
 
-    public void unzip(Context context) {
+    public void unzip() {
         String zipFile = fileName;
         unzipLocation = context.getFilesDir();
         Decompress d = new Decompress(zipFile, unzipLocation.toString() + "/unzipped/");
@@ -105,8 +108,8 @@ public class EpubFile {
         return null;
     }
 
-    public void getContent(Context context) {
-        unzip(context);
+    public void getContent() {
+        unzip();
         unzippedDir = getUnzippedDirectory();
         parse(unzippedDir + "/" +
                 getContentDir(new File(unzippedDir).list()) + "/" +
@@ -119,7 +122,28 @@ public class EpubFile {
         return path;
     }
 
+    public void hideSystemUI() {
+        // Set the IMMERSIVE flag.
+        // Set the content to appear under the system bars so that the content
+        // doesn't resize when the system bars hide and show.
+        view.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    }
+
+    public void showSystemUI() {
+        view.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    }
+
     public void open(final Context context, View view) {
+        this.view = view;
         final WebView webView = (WebView) view.findViewById(R.id.webview);
         webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
         WebSettings settings = webView.getSettings();
@@ -128,7 +152,7 @@ public class EpubFile {
         settings.setDefaultFontSize(18); //sets the font size. default is 16.
         settings.setDisplayZoomControls(false); //set display of zoom controls
 
-        webView.setOnTouchListener(new OnSwipeTouchListener(context) {
+        /*webView.setOnTouchListener(new OnSwipeTouchListener(context) {
             public void onSwipeLeft() {
                 if(currentChapter != contents.size()) {
                     currentChapter++;
@@ -147,6 +171,34 @@ public class EpubFile {
                     Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
                 }
             }
+        });*/
+        webView.setOnTouchListener(new OnSingleTapListener(context) {
+            public void onSwipeLeft() {
+                if(currentChapter != contents.size()) {
+                    currentChapter++;
+                    webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+                }
+                else {
+                    Toast.makeText(context, "End of the book", Toast.LENGTH_SHORT).show();
+                }
+            }
+            public void onSwipeRight() {
+                if(currentChapter != 0) {
+                    currentChapter--;
+                    webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+                }
+                else {
+                    Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
+                }
+            }
+            public void onSwipeBottom() {
+                showSystemUI();
+            }
+            public void onSwipeTop() {
+                hideSystemUI();
+            }
+
+
         });
     }
 }
