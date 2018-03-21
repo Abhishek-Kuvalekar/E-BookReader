@@ -2,13 +2,16 @@ package se.coep.org.in.e_bookreader;
 
 import android.graphics.Canvas;
 import android.net.Uri;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 
@@ -30,6 +33,8 @@ import java.util.List;
 
 public class FileRendererActivity extends AppCompatActivity {
     private String fileName;
+    private boolean immersiveVisibilityFlag = true;
+
     //private PDFView pdfView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,12 +71,13 @@ public class FileRendererActivity extends AppCompatActivity {
                 .linkHandler()
                 .pageFitPolicy(FitPolicy.WIDTH)
                 .load();*/
-
-        if(fileName.endsWith("epub")) {
-            EpubFile file = new EpubFile(fileName);
-            file.getContent(this);
+        if (fileName.endsWith("epub")) {
+            EpubFile file = new EpubFile(fileName, this);
+            file.getContent();
             file.open(this, this.getWindow().getDecorView());
         }
+
     }
+
 
 }
