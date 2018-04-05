@@ -54,7 +54,7 @@ public class EpubFile {
         return unzipLocation.toString() + "/unzipped";
     }
 
-    public void parse(String fileToBeParsed) {
+    public List<String> parse(String fileToBeParsed) {
         List<String> navList = new ArrayList<String>();
         try {
             File inputFile = new File(fileToBeParsed);
@@ -82,6 +82,37 @@ public class EpubFile {
             e.printStackTrace();
         }
         this.contents = navList;
+        return navList;
+    }
+
+    public List<String> parseForContent(String fileToBeParsed) {
+        List<String> navList = new ArrayList<String>();
+        try {
+            File inputFile = new File(fileToBeParsed);
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(inputFile);
+            doc.getDocumentElement().normalize();
+            NodeList nList = doc.getElementsByTagName("navPoint");
+
+            for(int temp = 0; temp < nList.getLength(); temp++) {
+                Node nNode = nList.item(temp);
+                if(nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    int pos = Integer.parseInt(eElement.getAttribute("playOrder")) - 1;
+                    Element node = (Element)eElement.getElementsByTagName("text").item(0);
+                    String chapter = node.getTextContent();
+                    navList.add(pos, chapter);
+                }
+            }
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return navList;
     }
 
     public String getContentDir(String[] fileList) {
@@ -108,18 +139,26 @@ public class EpubFile {
         return null;
     }
 
-    public void getContent() {
+    public String getNcxFilePath() {
         unzip();
         unzippedDir = getUnzippedDirectory();
-        parse(unzippedDir + "/" +
+        List<String> parsedContentList = parse(unzippedDir + "/" +
                 getContentDir(new File(unzippedDir).list()) + "/" +
                 getContentFile());
+        String ncxFilePath = unzippedDir + "/" +
+                getContentDir(new File(unzippedDir).list()) + "/" +
+                getContentFile();
+        return ncxFilePath;
     }
 
     public String getCurrentChapterPath() {
         String path = unzippedDir + "/" + getContentDir(new File(unzippedDir).list()) +
                 "/" + contents.get(currentChapter);
         return path;
+    }
+
+    public void setCurrentChapter(int currentChapter) {
+        this.currentChapter = currentChapter;
     }
 
     public void hideSystemUI() {

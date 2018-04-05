@@ -1,12 +1,23 @@
 package se.coep.org.in.e_bookreader;
 
+import android.annotation.SuppressLint;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GestureDetectorCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
@@ -34,13 +45,23 @@ import java.util.List;
 public class FileRendererActivity extends AppCompatActivity {
     private String fileName;
     private boolean immersiveVisibilityFlag = true;
+    private DrawerLayout mDrawerLayout;
+    private boolean isDrawerPressed = false;
 
     //private PDFView pdfView;
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_renderer_pdf);
-
+        ActionBar actionbar = getSupportActionBar();
+        Drawable mDrawable = ContextCompat.getDrawable(this, R.drawable.ic_menu);;
+        mDrawable.setColorFilter(new
+                PorterDuffColorFilter(R.color.white,PorterDuff.Mode.SRC_ATOP));
+        actionbar.setHomeAsUpIndicator(mDrawable);
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
         fileName = getIntent().getStringExtra(FileChooserActivity.FILE_NAME);
 
         /*pdfView = (PDFView) findViewById(R.id.pdfView);
@@ -73,11 +94,31 @@ public class FileRendererActivity extends AppCompatActivity {
                 .load();*/
         if (fileName.endsWith("epub")) {
             EpubFile file = new EpubFile(fileName, this);
-            file.getContent();
+            String ncxFilePath = file.getNcxFilePath();
+            file.parse(ncxFilePath);
             file.open(this, this.getWindow().getDecorView());
+            ContentNavigation nav = new ContentNavigation("epub", this, this.getWindow().getDecorView());
+            nav.addContent(file.getContentFile(), file);
         }
-
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(!isDrawerPressed) {
+            switch (item.getItemId()) {
+                case android.R.id.home:
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                    isDrawerPressed = true;
+                    return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }else {;
+            mDrawerLayout.closeDrawers();
+            isDrawerPressed = false;
+            return true;
+        }
+    }
+
 
 
 }
