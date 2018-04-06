@@ -262,15 +262,6 @@ public class EpubFile {
         // doesn't resize when the system bars hide and show.
         DrawerLayout drawerLayout = view.findViewById(R.id.drawer_layout);
         drawerLayout.setFitsSystemWindows(false);
-        //getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-         //       | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        /*view.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);*/
         view.setSystemUiVisibility(
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -278,15 +269,9 @@ public class EpubFile {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE);
-        //drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
     }
 
     public void showSystemUI() {
-        //DrawerLayout drawerLayout = view.findViewById(R.id.drawer_layout);
-        //drawerLayout.setFitsSystemWindows(true);
-        //getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-        //        | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         view.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -297,6 +282,15 @@ public class EpubFile {
         return (Activity) context;
     }
 
+    private void updateWebView() {
+        if(this.currentChapter != -1) {
+            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+        }
+        else {
+            currentChapter = -1;
+            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
+        }
+    }
     public void changeFontSize(boolean isToBeIncreased) {
         if(isToBeIncreased == true && fontSize != 24) {
             this.fontSize++;
@@ -305,13 +299,7 @@ public class EpubFile {
             this.fontSize--;
         }
         webView.getSettings().setDefaultFontSize(fontSize);
-        if(this.currentChapter != -1) {
-            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
-        }
-        else {
-            currentChapter = -1;
-            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
-        }
+        updateWebView();
     }
 
     public int getFontSize() {

@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 
@@ -36,10 +37,7 @@ public class FileRendererActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private boolean isDrawerPressed = false;
     private EpubFile file;
-
-    //private PDFView pdfView;
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @SuppressLint("ResourceAsColor")
+    public static String currentFont = "Default";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +83,7 @@ public class FileRendererActivity extends AppCompatActivity {
                     fontSize.setText(Integer.toString(file.getFontSize()));
                     ImageButton fontPlus = (ImageButton) optionsDialog.findViewById(R.id.plus_button_options_dialog);
                     ImageButton fontMinus = (ImageButton) optionsDialog.findViewById(R.id.minus_button_options_dialog);
+                    Spinner fontFamily = (Spinner) optionsDialog.findViewById(R.id.font_family_spinner_options_dialog);
                     fontPlus.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -99,6 +98,7 @@ public class FileRendererActivity extends AppCompatActivity {
                             fontSize.setText(Integer.toString(file.getFontSize()));
                         }
                     });
+                    fontFamily.setOnItemSelectedListener(new MyItemSelectedListener());
                     return true;
             }
             return super.onOptionsItemSelected(item);

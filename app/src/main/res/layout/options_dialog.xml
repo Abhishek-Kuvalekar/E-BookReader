@@ -7,44 +7,82 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:padding="10dp">
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp">
-            <TextView
-                android:text="Font Size"
-                android:textSize="14dp"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:textColor="#000"></TextView>
-            <TextView
+            android:orientation="horizontal">
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="16"
-                android:textSize="14dp"
-                android:padding="3dp"
-                android:id="@+id/font_size_options_dialog"></TextView>
+                android:layout_marginLeft="10dp">
+                <TextView
+                    android:text="Font Size"
+                    android:textSize="14dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textColor="#000"></TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="16"
+                    android:textSize="14dp"
+                    android:padding="3dp"
+                    android:id="@+id/font_size_options_dialog"></TextView>
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="80dp">
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_minus"
+                    android:id="@+id/minus_button_options_dialog"
+                    android:layout_marginRight="20dp"/>
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_plus"
+                    android:id="@+id/plus_button_options_dialog"/>
+            </LinearLayout>
         </LinearLayout>
         <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="100dp">
-            <ImageButton
-                android:layout_width="wrap_content"
+            android:orientation="horizontal">
+            <Spinner
+                android:layout_width="230dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/ic_minus"
-                android:id="@+id/minus_button_options_dialog"
-                android:layout_marginRight="20dp"/>
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_plus"
-                android:id="@+id/plus_button_options_dialog"/>
+                android:id="@+id/font_family_spinner_options_dialog"
+                android:entries="@array/fonts">
+            </Spinner>
         </LinearLayout>
     </LinearLayout>
 
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dummy Text"
+            android:textSize="18dp"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
 </LinearLayout>
