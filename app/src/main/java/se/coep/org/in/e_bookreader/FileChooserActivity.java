@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -20,7 +21,7 @@ import java.util.regex.Pattern;
 
 public class FileChooserActivity extends AppCompatActivity {
     public static final String FILE_NAME = "in.org.coep.se.filechooseractivity.file_name";
-
+    public static final int REQUEST_CODE = 9999;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +41,11 @@ public class FileChooserActivity extends AppCompatActivity {
     @Override
     public void onRestart() {
         super.onRestart();
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
         finish();
     }
 

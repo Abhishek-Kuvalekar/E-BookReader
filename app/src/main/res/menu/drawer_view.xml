@@ -2,17 +2,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     android:id = "@+id/drawerView"
     android:checkableBehavior="single">
-    <item
-        android:id="@+id/nav_camera"
-        android:title="import" />
-    <item
-        android:id="@+id/nav_gallery"
-        android:title="gallery" />
-    <item
-        android:id="@+id/nav_slideshow"
-        android:title="slideshow" />
-    <item
-        android:id="@+id/nav_manage"
-        android:title="tools" />
 
 </menu>

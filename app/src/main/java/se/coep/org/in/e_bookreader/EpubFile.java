@@ -1,10 +1,15 @@
 package se.coep.org.in.e_bookreader;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -19,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,6 +42,8 @@ public class EpubFile {
     private int currentChapter;
     private Context context;
     private View view;
+    public static final String TAG = "tag";
+    private int counter = 0;
 
     public EpubFile(String fileName, Context context) {
         this.context = context;
@@ -45,12 +53,20 @@ public class EpubFile {
 
     public void unzip() {
         String zipFile = fileName;
-        unzipLocation = context.getFilesDir();
+        //unzipLocation = context.getFilesDir();
+        unzipLocation = Environment.getExternalStorageDirectory();
+        Log.d(TAG, String.valueOf(unzipLocation.toString()));
         Decompress d = new Decompress(zipFile, unzipLocation.toString() + "/unzipped/");
         d.unzip();
     }
 
     public String getUnzippedDirectory() {
+        File f = new File(unzipLocation.toString()+"/unzipped/");
+        String[] list = f.list();
+        if(list[0].endsWith(".epub_FILES")) {
+            Log.d("Decompress", "nestedfile"+ unzipLocation.toString() + "/unzipped"+list[0]);
+            return unzipLocation.toString() + "/unzipped/"+list[0];
+        }
         return unzipLocation.toString() + "/unzipped";
     }
 
@@ -71,7 +87,13 @@ public class EpubFile {
                     int pos = Integer.parseInt(eElement.getAttribute("playOrder")) - 1;
                     Element node = (Element)eElement.getElementsByTagName("content").item(0);
                     String chapter = node.getAttribute("src");
-                    navList.add(pos, chapter);
+                    if (chapter.startsWith("OEBPS/")) {
+                        String[] chapterName = chapter.split("/", 2);
+                        Log.d("tag", chapterName[1]);
+                        navList.add(pos, chapterName[1]);
+                    }else {
+                        navList.add(pos, chapter);
+                    }
                 }
             }
         } catch (ParserConfigurationException e) {
@@ -102,7 +124,12 @@ public class EpubFile {
                     int pos = Integer.parseInt(eElement.getAttribute("playOrder")) - 1;
                     Element node = (Element)eElement.getElementsByTagName("text").item(0);
                     String chapter = node.getTextContent();
-                    navList.add(pos, chapter);
+                    if (chapter.startsWith("OEBPS/")) {
+                        String[] chapterName = chapter.split("/", 2);
+                        navList.add(pos, chapterName[1]);
+                    }else {
+                        navList.add(pos, chapter);
+                    }
                 }
             }
         } catch (ParserConfigurationException e) {
@@ -119,6 +146,21 @@ public class EpubFile {
         for(String file: fileList) {
             if(file.startsWith("O")) {
                 return file;
+            }
+        }
+        return null;
+    }
+
+    public String getCoverPage() {
+        String coverPagePath = unzippedDir +"/"+ getContentDir(new File(unzippedDir).list());
+        Log.d("tag3", coverPagePath);
+        File f = new File(coverPagePath);
+        String[] list = f.list();
+        for(String coverFile: list) {
+            if(coverFile.contains("cover")) {
+                return coverPagePath+"/"+coverFile;
+            } else if(coverFile.contains("title.xhtml")) {
+                return coverPagePath+"/"+coverFile;
             }
         }
         return null;
@@ -161,30 +203,15 @@ public class EpubFile {
         this.currentChapter = currentChapter;
     }
 
-    public void hideSystemUI() {
-        // Set the IMMERSIVE flag.
-        // Set the content to appear under the system bars so that the content
-        // doesn't resize when the system bars hide and show.
-        view.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-    }
-
-    public void showSystemUI() {
-        view.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-    }
-
     public void open(final Context context, View view) {
         this.view = view;
         final WebView webView = (WebView) view.findViewById(R.id.webview);
-        webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+        if(getCoverPage() == null) {
+            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+        } else {
+            currentChapter = -1;
+            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
+        }
         WebSettings settings = webView.getSettings();
         settings.setBuiltInZoomControls(true); //sets zooming with pinching
         //settings.setTextZoom(110);     //sets the zoom of the page in percent
@@ -215,6 +242,7 @@ public class EpubFile {
             public void onSwipeLeft() {
                 if(currentChapter != contents.size()) {
                     currentChapter++;
+                    Log.d("tag2", getCurrentChapterPath());
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
                 }
                 else {
@@ -225,6 +253,9 @@ public class EpubFile {
                 if(currentChapter != 0) {
                     currentChapter--;
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+                }
+                else if(currentChapter == 0) {
+                    webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
                 }
                 else {
                     Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
@@ -239,5 +270,46 @@ public class EpubFile {
 
 
         });
+    }
+
+    public void hideSystemUI() {
+        // Set the IMMERSIVE flag.
+        // Set the content to appear under the system bars so that the content
+        // doesn't resize when the system bars hide and show.
+        DrawerLayout drawerLayout = view.findViewById(R.id.drawer_layout);
+        drawerLayout.setFitsSystemWindows(false);
+        //getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
+         //       | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        /*view.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);*/
+        view.setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE);
+        //drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
+    }
+
+    public void showSystemUI() {
+        //DrawerLayout drawerLayout = view.findViewById(R.id.drawer_layout);
+        //drawerLayout.setFitsSystemWindows(true);
+        //getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
+        //        | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        view.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    }
+
+    public Activity getActivity() {
+        return (Activity) context;
     }
 }

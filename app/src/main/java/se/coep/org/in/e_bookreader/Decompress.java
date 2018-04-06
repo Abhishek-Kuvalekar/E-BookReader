@@ -34,7 +34,8 @@ public class Decompress {
 
     public void unzip() {
         try  {
-
+            File file = new File(_location);
+            file.mkdir();
             ZipFile zipFile = new ZipFile(_zipFile);
             Enumeration files = zipFile.entries();
             while (files.hasMoreElements()) {
@@ -43,9 +44,13 @@ public class Decompress {
                 Log.v("Decompress", "isDirectory: " + entry.isDirectory());
 
                 if (entry.isDirectory()) {
-                    File file = new File(_location + entry.getName());
-                    file.mkdir();
-                    Log.d("Decompress", "Create dir " + entry.getName());
+                    if(entry.toString().endsWith(".epub_FILES/")) {
+                        continue;
+                    } else {
+                        File file1 = new File(_location + entry.getName());
+                        file1.mkdir();
+                        Log.d("Decompress", "Create dir " + entry.getName());
+                    }
                 } else {
                     File f = new File(_location + entry.getName());
                     f.getParentFile().mkdirs();

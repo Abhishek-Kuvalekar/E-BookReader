@@ -1,6 +1,8 @@
 package se.coep.org.in.e_bookreader;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -20,6 +22,7 @@ import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -119,6 +122,10 @@ public class FileRendererActivity extends AppCompatActivity {
         }
     }
 
-
-
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, FileChooserActivity.class);
+        startActivity(intent);
+        finish();
+    }
 }
