@@ -99,7 +99,7 @@ public class FileRendererActivity extends AppCompatActivity {
             EpubFile file = new EpubFile(fileName, this);
             String ncxFilePath = file.getNcxFilePath();
             file.parse(ncxFilePath);
-            file.open(this, this.getWindow().getDecorView());
+            file.open(this, this.getWindow().getDecorView(), false);
             ContentNavigation nav = new ContentNavigation("epub", this, this.getWindow().getDecorView());
             nav.addContent(file.getContentFile(), file);
         }

@@ -203,10 +203,12 @@ public class EpubFile {
         this.currentChapter = currentChapter;
     }
 
-    public void open(final Context context, View view) {
+    public void open(final Context context, View view, boolean navigationClicked) {
         this.view = view;
         final WebView webView = (WebView) view.findViewById(R.id.webview);
-        if(getCoverPage() == null) {
+        if(getCoverPage() == null && navigationClicked == false) {
+            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+        } else if(navigationClicked == true) {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
         } else {
             currentChapter = -1;

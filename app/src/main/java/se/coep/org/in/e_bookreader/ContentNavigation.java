@@ -20,6 +20,7 @@ public class ContentNavigation {
     private View view;
     private String ncxFile;
     private EpubFile file;
+    private int previousItem = 0;
 
     public ContentNavigation(String fileType, Context context, View view) {
         this.fileType = fileType;
@@ -41,17 +42,20 @@ public class ContentNavigation {
         final NavigationView navigationView = (NavigationView)view.findViewById(R.id.nav_view);
         final DrawerLayout mDrawerLayout;
         mDrawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
+        previousItem = 0;
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         menuItem.setChecked(true);
+                        navigationView.getMenu().getItem(previousItem).setChecked(false);
+                        previousItem = menuItem.getItemId();
                         mDrawerLayout.closeDrawers();
                         // close drawer when item is tapped
                         // Add code here to update the UI based on the item selected
                         // For example, swap UI fragments here
                         file.setCurrentChapter(menuItem.getItemId());
-                        file.open(context, view);
+                        file.open(context, view, true);
                         return true;
                     }
                 });
