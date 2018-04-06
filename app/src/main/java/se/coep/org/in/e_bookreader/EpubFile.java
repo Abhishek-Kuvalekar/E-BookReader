@@ -44,10 +44,14 @@ public class EpubFile {
     private View view;
     public static final String TAG = "tag";
     private int counter = 0;
+    private int fontSize = 18;
+    private final WebView webView;
 
-    public EpubFile(String fileName, Context context) {
+    public EpubFile(String fileName, Context context, View view) {
         this.context = context;
         this.fileName = fileName;
+        this.view = view;
+        webView = (WebView) view.findViewById(R.id.webview);
         currentChapter = 0;
     }
 
@@ -204,8 +208,6 @@ public class EpubFile {
     }
 
     public void open(final Context context, View view, boolean navigationClicked) {
-        this.view = view;
-        final WebView webView = (WebView) view.findViewById(R.id.webview);
         if(getCoverPage() == null && navigationClicked == false) {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
         } else if(navigationClicked == true) {
@@ -217,29 +219,9 @@ public class EpubFile {
         WebSettings settings = webView.getSettings();
         settings.setBuiltInZoomControls(true); //sets zooming with pinching
         //settings.setTextZoom(110);     //sets the zoom of the page in percent
-        settings.setDefaultFontSize(18); //sets the font size. default is 16.
+        settings.setDefaultFontSize(fontSize); //sets the font size. default is 16.
         settings.setDisplayZoomControls(false); //set display of zoom controls
 
-        /*webView.setOnTouchListener(new OnSwipeTouchListener(context) {
-            public void onSwipeLeft() {
-                if(currentChapter != contents.size()) {
-                    currentChapter++;
-                    webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
-                }
-                else {
-                    Toast.makeText(context, "End of the book", Toast.LENGTH_SHORT).show();
-                }
-            }
-            public void onSwipeRight() {
-                if(currentChapter != 0) {
-                    currentChapter--;
-                    webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
-                }
-                else {
-                    Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });*/
         webView.setOnTouchListener(new OnSingleTapListener(context) {
             public void onSwipeLeft() {
                 if(currentChapter != contents.size()) {
@@ -313,5 +295,26 @@ public class EpubFile {
 
     public Activity getActivity() {
         return (Activity) context;
+    }
+
+    public void changeFontSize(boolean isToBeIncreased) {
+        if(isToBeIncreased == true && fontSize != 24) {
+            this.fontSize++;
+        }
+        else if(fontSize != 12 && isToBeIncreased == false) {
+            this.fontSize--;
+        }
+        webView.getSettings().setDefaultFontSize(fontSize);
+        if(this.currentChapter != -1) {
+            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+        }
+        else {
+            currentChapter = -1;
+            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
+        }
+    }
+
+    public int getFontSize() {
+        return this.fontSize;
     }
 }
