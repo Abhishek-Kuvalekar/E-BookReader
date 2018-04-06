@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -207,7 +210,9 @@ public class EpubFile {
         this.currentChapter = currentChapter;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void open(final Context context, View view, boolean navigationClicked) {
+        final WebView webView = (WebView)view.findViewById(R.id.webview);
         if(getCoverPage() == null && navigationClicked == false) {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
         } else if(navigationClicked == true) {
