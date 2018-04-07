@@ -97,7 +97,6 @@ public class EpubFile {
     }
 
     public String getUnzippedDirectory() {
-        unzip();
         File f = new File(unzipLocation.toString()+"/unzipped/");
         String[] list = f.list();
         if(list[0].endsWith(".epub_FILES")) {
@@ -219,6 +218,7 @@ public class EpubFile {
     }
 
     public String getNcxFilePath() {
+        unzip();
         unzippedDir = getUnzippedDirectory();
         List<String> parsedContentList = parse(unzippedDir + "/" +
                 getContentDir(new File(unzippedDir).list()) + "/" +
