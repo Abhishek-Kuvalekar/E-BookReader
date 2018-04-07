@@ -1,11 +1,14 @@
 package se.coep.org.in.e_bookreader;
 
+import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -45,6 +48,8 @@ public class FileRendererActivity extends AppCompatActivity {
 
     public static String currentFont = "Default";
     private String pasteData;
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,6 +153,8 @@ public class FileRendererActivity extends AppCompatActivity {
         Log.v("text1", String.valueOf(menu.getItem(2).getTitle()));
 
         menu.getItem(0).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @TargetApi(Build.VERSION_CODES.KITKAT)
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 Toast.makeText(FileRendererActivity.this, "Text Highlighted!", Toast.LENGTH_SHORT).show();
@@ -197,6 +204,8 @@ public class FileRendererActivity extends AppCompatActivity {
             this.view = view;
         }
 
+        @TargetApi(Build.VERSION_CODES.KITKAT)
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             Toast.makeText(context, text, Toast.LENGTH_SHORT).show();

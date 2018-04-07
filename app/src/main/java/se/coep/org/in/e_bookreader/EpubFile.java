@@ -397,6 +397,7 @@ public class EpubFile {
                 "</style>";
 
         addCSSToXML(CSS, getCurrentChapterPath());
+        webView.reload();
         for(int i = 0; i < contents.size(); i++) {
             String path = getUnzippedDirectory() + "/" +
                     getContentDir(new File(getUnzippedDirectory()).list()) + "/" +
@@ -407,7 +408,6 @@ public class EpubFile {
             }
             addCSSToXML(CSS, path);
         }
-        webView.reload();
     }
 
     public String[] getContentOfNcxFile(String fileToBeParsed) {
