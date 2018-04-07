@@ -222,6 +222,7 @@ public class EpubFile {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
         }
         WebSettings settings = webView.getSettings();
+        settings.setDomStorageEnabled(true);
         settings.setBuiltInZoomControls(true); //sets zooming with pinching
         //settings.setTextZoom(110);     //sets the zoom of the page in percent
         settings.setDefaultFontSize(fontSize); //sets the font size. default is 16.
