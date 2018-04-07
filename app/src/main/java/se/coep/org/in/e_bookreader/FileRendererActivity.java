@@ -1,14 +1,8 @@
 package se.coep.org.in.e_bookreader;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -24,20 +18,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-
 public class FileRendererActivity extends AppCompatActivity {
     private String fileName;
     private boolean immersiveVisibilityFlag = true;
     private DrawerLayout mDrawerLayout;
     private boolean isDrawerPressed = false;
     private EpubFile file;
-    public static String currentFont = "Default";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,7 +85,9 @@ public class FileRendererActivity extends AppCompatActivity {
                             fontSize.setText(Integer.toString(file.getFontSize()));
                         }
                     });
-                    fontFamily.setOnItemSelectedListener(new MyItemSelectedListener());
+                    MyItemSelectedListener myItemSelectedListener = new MyItemSelectedListener(file, file.getFontFamilyPosition());
+                    fontFamily.setOnItemSelectedListener(myItemSelectedListener);
+                    fontFamily.setSelection(file.getFontFamilyPosition());
                     return true;
             }
             return super.onOptionsItemSelected(item);

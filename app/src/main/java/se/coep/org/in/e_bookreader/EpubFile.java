@@ -1,17 +1,23 @@
 package se.coep.org.in.e_bookreader;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.w3c.dom.Document;
@@ -20,9 +26,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NavigableMap;
 
@@ -37,22 +54,32 @@ import javax.xml.parsers.ParserConfigurationException;
 public class EpubFile {
     private String fileName;
     private File unzipLocation;
-    private List<String> contents;
+    private static List<String> contents;
     private String unzippedDir;
-    private int currentChapter;
+    private static int currentChapter;
     private Context context;
     private View view;
     public static final String TAG = "tag";
     private int counter = 0;
     private int fontSize = 18;
-    private final WebView webView;
+    private WebView webView;
+    private int fontFamilyPosition;
 
     public EpubFile(String fileName, Context context, View view) {
         this.context = context;
         this.fileName = fileName;
         this.view = view;
+        this.fontFamilyPosition = 0;
         webView = (WebView) view.findViewById(R.id.webview);
         currentChapter = 0;
+    }
+
+    public void setFontFamilyPosition(int fontFamilyPosition) {
+        this.fontFamilyPosition = fontFamilyPosition;
+    }
+
+    public int getFontFamilyPosition() {
+        return this.fontFamilyPosition;
     }
 
     public void unzip() {
@@ -203,6 +230,12 @@ public class EpubFile {
         return path;
     }
 
+    public String getCSSDirectory() {
+        String path = unzippedDir + "/" + getContentDir(new File(unzippedDir).list()) +
+                "/" + "css";
+        return path;
+    }
+
     public void setCurrentChapter(int currentChapter) {
         this.currentChapter = currentChapter;
     }
@@ -291,6 +324,7 @@ public class EpubFile {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
         }
     }
+
     public void changeFontSize(boolean isToBeIncreased) {
         if(isToBeIncreased == true && fontSize != 24) {
             this.fontSize++;
@@ -304,5 +338,67 @@ public class EpubFile {
 
     public int getFontSize() {
         return this.fontSize;
+    }
+
+
+    public void addCSSToXML(String CSS, String filePath) {
+        BufferedReader reader = null;
+        PrintWriter out = null;
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = null;
+            StringBuilder stringBuilder = new StringBuilder();
+            String ls = System.getProperty("line.separator");
+
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(ls);
+            }
+
+            String content = stringBuilder.toString();
+            int separator = content.indexOf("</head>");
+            String finalContent = content.substring(0, separator) + "\n" + CSS + "\n" +
+                    content.substring(separator, content.length());
+
+            out = new PrintWriter(new BufferedWriter(new FileWriter(filePath)));
+            out.print(finalContent);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void changeFontStyle(String fontStyle) {
+        //String path = getCSSDirectory();
+        String CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
+                "body {" +
+                "font-family:\"" + fontStyle + "\";}" +
+                "</style>";
+
+        addCSSToXML(CSS, getCurrentChapterPath());
+        for(int i = 0; i < contents.size(); i++) {
+            String path = getUnzippedDirectory() + "/" +
+                    getContentDir(new File(getUnzippedDirectory()).list()) + "/" +
+                    contents.get(i);
+            Log.d("Test", path + "***" + getCurrentChapterPath());
+            if(path == getCurrentChapterPath()) {
+                continue;
+            }
+            addCSSToXML(CSS, path);
+        }
+        webView.reload();
     }
 }
