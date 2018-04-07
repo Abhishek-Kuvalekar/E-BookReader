@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">E-Book Reader</string>
     <string-array name="fonts">
-        <item>Font 1</item>
-        <item>Font 2</item>
-        <item>Font 3</item>
-        <item>Font 4</item>
+        <item>Arial</item>
+        <item>Times New Roman</item>
+        <item>Monospace</item>
     </string-array>
 </resources>

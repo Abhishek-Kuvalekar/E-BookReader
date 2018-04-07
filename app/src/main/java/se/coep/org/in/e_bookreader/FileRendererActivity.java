@@ -1,17 +1,11 @@
 package se.coep.org.in.e_bookreader;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -48,6 +42,7 @@ public class FileRendererActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private boolean isDrawerPressed = false;
     private EpubFile file;
+
     public static String currentFont = "Default";
     private String pasteData;
     @Override
@@ -88,34 +83,36 @@ public class FileRendererActivity extends AppCompatActivity {
                 }
                 return true;
 
-            case R.id.optionsButton:
-                final Dialog optionsDialog = new Dialog(this);
-                optionsDialog.setContentView(R.layout.options_dialog);
-                optionsDialog.getWindow().setGravity(Gravity.RIGHT | Gravity.TOP);
-                optionsDialog.show();
-                final TextView fontSize = (TextView) optionsDialog.findViewById(R.id.font_size_options_dialog);
-                fontSize.setText(Integer.toString(file.getFontSize()));
-                ImageButton fontPlus = (ImageButton) optionsDialog.findViewById(R.id.plus_button_options_dialog);
-                ImageButton fontMinus = (ImageButton) optionsDialog.findViewById(R.id.minus_button_options_dialog);
-                Spinner fontFamily = (Spinner) optionsDialog.findViewById(R.id.font_family_spinner_options_dialog);
-                fontPlus.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        file.changeFontSize(true);
-                        fontSize.setText(Integer.toString(file.getFontSize()));
-                    }
-                });
-                fontMinus.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        file.changeFontSize(false);
-                        fontSize.setText(Integer.toString(file.getFontSize()));
-                    }
-                });
-                fontFamily.setOnItemSelectedListener(new MyItemSelectedListener());
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
+                case R.id.optionsButton:
+                    final Dialog optionsDialog = new Dialog(this);
+                    optionsDialog.setContentView(R.layout.options_dialog);
+                    optionsDialog.getWindow().setGravity(Gravity.RIGHT | Gravity.TOP);
+                    optionsDialog.show();
+                    final TextView fontSize = (TextView) optionsDialog.findViewById(R.id.font_size_options_dialog);
+                    fontSize.setText(Integer.toString(file.getFontSize()));
+                    ImageButton fontPlus = (ImageButton) optionsDialog.findViewById(R.id.plus_button_options_dialog);
+                    ImageButton fontMinus = (ImageButton) optionsDialog.findViewById(R.id.minus_button_options_dialog);
+                    Spinner fontFamily = (Spinner) optionsDialog.findViewById(R.id.font_family_spinner_options_dialog);
+                    fontPlus.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            file.changeFontSize(true);
+                            fontSize.setText(Integer.toString(file.getFontSize()));
+                        }
+                    });
+                    fontMinus.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            file.changeFontSize(false);
+                            fontSize.setText(Integer.toString(file.getFontSize()));
+                        }
+                    });
+                    MyItemSelectedListener myItemSelectedListener = new MyItemSelectedListener(file, file.getFontFamilyPosition());
+                    fontFamily.setOnItemSelectedListener(myItemSelectedListener);
+                    fontFamily.setSelection(file.getFontFamilyPosition());
+                    return true;
+            }
+            return super.onOptionsItemSelected(item);
 
     }
 
