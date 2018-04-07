@@ -12,21 +12,20 @@ import java.io.IOException;
 
 public class Bookmarks {
     public Bookmarks() {
-        File bookmarks_file = new File("bookmarks.xml");
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(bookmarks_file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-        String line;
-        try {
-            while ((line = bufferedReader.readLine()) != null) {
 
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
+
+    public void addBookmark() {
+
+    }
+
+    public void deleteBookmark() {
+
+    }
+
+    public String[] fetchBookmarks() {
+        //StringBuffer buffer = getContentOfNcxFile();
+        return null;
+    }
+
 }

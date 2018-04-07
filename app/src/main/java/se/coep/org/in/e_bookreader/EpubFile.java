@@ -23,8 +23,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableMap;
@@ -68,6 +74,7 @@ public class EpubFile {
     }
 
     public String getUnzippedDirectory() {
+        unzip();
         File f = new File(unzipLocation.toString()+"/unzipped/");
         String[] list = f.list();
         if(list[0].endsWith(".epub_FILES")) {
@@ -189,7 +196,6 @@ public class EpubFile {
     }
 
     public String getNcxFilePath() {
-        unzip();
         unzippedDir = getUnzippedDirectory();
         List<String> parsedContentList = parse(unzippedDir + "/" +
                 getContentDir(new File(unzippedDir).list()) + "/" +
@@ -310,5 +316,75 @@ public class EpubFile {
 
     public int getFontSize() {
         return this.fontSize;
+    }
+
+    public String[] getContentOfNcxFile(String fileToBeParsed) {
+        BufferedReader in = null;
+        String[] stringArr;
+        try {
+            in = new BufferedReader(    new InputStreamReader( new FileInputStream(fileToBeParsed)));
+            String str;
+
+            List<String> list = new ArrayList<String>();
+            while((str = in.readLine()) != null){
+                list.add(str);
+            }
+            stringArr = list.toArray(new String[0]);
+            return stringArr;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String[] addAttributeForBookmark(String ncxFilePath) {
+        String[] array = getContentOfNcxFile(ncxFilePath);
+        String [] newArray = new String[array.length];
+        for(int i=0; i<array.length; i++) {
+            if(array[i].contains("<navPoint")) {
+               newArray[i] = array[i].replaceFirst("<navPoint", "<navPoint bookmark=1");
+            }else {
+                newArray[i] = array[i];
+            }
+            Log.v("content", " "+newArray[i]);
+        }
+
+        FileWriter fw = null;
+        try {
+            File file = new File(unzipLocation.toString() + "/unzipped/test.xml");
+            fw = new FileWriter(file);
+            for (int i = 0; i < newArray.length; i++) {
+                fw.write(newArray[i] + "\n");
+            }
+            fw.close();
+            Log.v("file", "written");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return newArray;
+    }
+
+    public void makeFile(String[] buffer) {
+        for(int i = 0; i<buffer.length; i++) {
+            Log.v("check", ""+buffer[i]);
+        }
+
+        File temp = new File(getUnzippedDirectory()+"/test.xml");
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter(temp);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(java.util.Arrays.toString(buffer));
+            Log.v("file","written");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void initializeForBookmark(String ncxFilePath) {
+        String[] arr = addAttributeForBookmark(ncxFilePath);
+        //makeFile(arr);
     }
 }
