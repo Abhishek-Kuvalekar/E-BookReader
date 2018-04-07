@@ -44,10 +44,14 @@ public class EpubFile {
     private View view;
     public static final String TAG = "tag";
     private int counter = 0;
+    private int fontSize = 18;
+    private final WebView webView;
 
-    public EpubFile(String fileName, Context context) {
+    public EpubFile(String fileName, Context context, View view) {
         this.context = context;
         this.fileName = fileName;
+        this.view = view;
+        webView = (WebView) view.findViewById(R.id.webview);
         currentChapter = 0;
     }
 
@@ -204,8 +208,6 @@ public class EpubFile {
     }
 
     public void open(final Context context, View view, boolean navigationClicked) {
-        this.view = view;
-        final WebView webView = (WebView) view.findViewById(R.id.webview);
         if(getCoverPage() == null && navigationClicked == false) {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
         } else if(navigationClicked == true) {
@@ -217,29 +219,9 @@ public class EpubFile {
         WebSettings settings = webView.getSettings();
         settings.setBuiltInZoomControls(true); //sets zooming with pinching
         //settings.setTextZoom(110);     //sets the zoom of the page in percent
-        settings.setDefaultFontSize(18); //sets the font size. default is 16.
+        settings.setDefaultFontSize(fontSize); //sets the font size. default is 16.
         settings.setDisplayZoomControls(false); //set display of zoom controls
 
-        /*webView.setOnTouchListener(new OnSwipeTouchListener(context) {
-            public void onSwipeLeft() {
-                if(currentChapter != contents.size()) {
-                    currentChapter++;
-                    webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
-                }
-                else {
-                    Toast.makeText(context, "End of the book", Toast.LENGTH_SHORT).show();
-                }
-            }
-            public void onSwipeRight() {
-                if(currentChapter != 0) {
-                    currentChapter--;
-                    webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
-                }
-                else {
-                    Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });*/
         webView.setOnTouchListener(new OnSingleTapListener(context) {
             public void onSwipeLeft() {
                 if(currentChapter != contents.size()) {
@@ -280,15 +262,6 @@ public class EpubFile {
         // doesn't resize when the system bars hide and show.
         DrawerLayout drawerLayout = view.findViewById(R.id.drawer_layout);
         drawerLayout.setFitsSystemWindows(false);
-        //getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-         //       | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        /*view.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);*/
         view.setSystemUiVisibility(
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -296,15 +269,9 @@ public class EpubFile {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE);
-        //drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
     }
 
     public void showSystemUI() {
-        //DrawerLayout drawerLayout = view.findViewById(R.id.drawer_layout);
-        //drawerLayout.setFitsSystemWindows(true);
-        //getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-        //        | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         view.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -313,5 +280,29 @@ public class EpubFile {
 
     public Activity getActivity() {
         return (Activity) context;
+    }
+
+    private void updateWebView() {
+        if(this.currentChapter != -1) {
+            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+        }
+        else {
+            currentChapter = -1;
+            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
+        }
+    }
+    public void changeFontSize(boolean isToBeIncreased) {
+        if(isToBeIncreased == true && fontSize != 24) {
+            this.fontSize++;
+        }
+        else if(fontSize != 12 && isToBeIncreased == false) {
+            this.fontSize--;
+        }
+        webView.getSettings().setDefaultFontSize(fontSize);
+        updateWebView();
+    }
+
+    public int getFontSize() {
+        return this.fontSize;
     }
 }
