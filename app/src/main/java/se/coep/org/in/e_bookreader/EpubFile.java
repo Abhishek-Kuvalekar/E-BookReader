@@ -395,16 +395,18 @@ public class EpubFile {
                 "body {" +
                 "font-family:\"" + fontStyle + "\";}" +
                 "</style>";
-
-        addCSSToXML(CSS, getCurrentChapterPath());
-        webView.reload();
+        if(currentChapter != -1) {
+            addCSSToXML(CSS, getCurrentChapterPath());
+            webView.reload();
+        }
         for(int i = 0; i < contents.size(); i++) {
             String path = getUnzippedDirectory() + "/" +
                     getContentDir(new File(getUnzippedDirectory()).list()) + "/" +
                     contents.get(i);
-            Log.d("Test", path + "***" + getCurrentChapterPath());
-            if(path == getCurrentChapterPath()) {
-                continue;
+            if (currentChapter != -1) {
+                if (path == getCurrentChapterPath()) {
+                    continue;
+                }
             }
             addCSSToXML(CSS, path);
         }
