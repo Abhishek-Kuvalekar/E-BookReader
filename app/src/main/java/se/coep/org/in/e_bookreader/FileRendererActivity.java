@@ -24,8 +24,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -93,11 +95,11 @@ public class FileRendererActivity extends AppCompatActivity {
                     optionsDialog.setContentView(R.layout.options_dialog);
                     optionsDialog.getWindow().setGravity(Gravity.RIGHT | Gravity.TOP);
                     optionsDialog.show();
+
                     final TextView fontSize = (TextView) optionsDialog.findViewById(R.id.font_size_options_dialog);
                     fontSize.setText(Integer.toString(file.getFontSize()));
                     ImageButton fontPlus = (ImageButton) optionsDialog.findViewById(R.id.plus_button_options_dialog);
                     ImageButton fontMinus = (ImageButton) optionsDialog.findViewById(R.id.minus_button_options_dialog);
-                    Spinner fontFamily = (Spinner) optionsDialog.findViewById(R.id.font_family_spinner_options_dialog);
                     fontPlus.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -112,9 +114,25 @@ public class FileRendererActivity extends AppCompatActivity {
                             fontSize.setText(Integer.toString(file.getFontSize()));
                         }
                     });
+
+                    Spinner fontFamily = (Spinner) optionsDialog.findViewById(R.id.font_family_spinner_options_dialog);
                     MyItemSelectedListener myItemSelectedListener = new MyItemSelectedListener(file, file.getFontFamilyPosition());
                     fontFamily.setOnItemSelectedListener(myItemSelectedListener);
                     fontFamily.setSelection(file.getFontFamilyPosition());
+
+                    final Switch nightMode = (Switch) optionsDialog.findViewById(R.id.night_mode_switch_options_dialog);
+                    nightMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            if(nightMode.isChecked()) {
+                                file.switchNightMode(true);
+                            }
+                            else {
+                                file.switchNightMode(false);
+                            }
+                        }
+                    });
+                    nightMode.setChecked(file.getNightModeState());
                     return true;
             }
             return super.onOptionsItemSelected(item);

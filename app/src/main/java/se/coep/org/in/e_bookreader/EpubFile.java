@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -69,6 +70,7 @@ public class EpubFile {
     private int fontSize = 18;
     private WebView webView;
     private int fontFamilyPosition;
+    private boolean isNightModeOn;
 
     public EpubFile(String fileName, Context context, View view) {
         this.context = context;
@@ -77,6 +79,7 @@ public class EpubFile {
         this.fontFamilyPosition = 0;
         webView = (WebView) view.findViewById(R.id.webview);
         currentChapter = 0;
+        this.isNightModeOn = false;
     }
 
     public void setFontFamilyPosition(int fontFamilyPosition) {
@@ -348,6 +351,10 @@ public class EpubFile {
         return this.fontSize;
     }
 
+    public boolean getNightModeState() {
+        return this.isNightModeOn;
+    }
+
 
     public void addCSSToXML(String CSS, String filePath) {
         BufferedReader reader = null;
@@ -390,7 +397,6 @@ public class EpubFile {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void changeFontStyle(String fontStyle) {
-        //String path = getCSSDirectory();
         String CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
                 "body {" +
                 "font-family:\"" + fontStyle + "\";}" +
@@ -412,6 +418,62 @@ public class EpubFile {
         }
     }
 
+    public void switchNightMode(boolean nightMode) {
+        String CSS;
+        if(nightMode == true) {
+            webView.setBackgroundColor(Color.BLACK);
+            CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
+                    "body{" +
+                    "color: #FFF;}" +
+                    "a {" +
+                    "color: #FFF;}" +
+                    ".chapterHeader {" +
+                    "color: #FFF;" +
+                    "background-color: #000;}" +
+                    ".chapterHeader .translation{" +
+                    "color: #FFF;" +
+                    "background-color: #000;}" +
+                    ".chapterHeader .count{" +
+                    "color: #FFF;" +
+                    "background-color: #000;}" +
+                    "</style>";
+            this.isNightModeOn = true;
+        }
+        else {
+            webView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
+                    "body{" +
+                    "color: #000;}" +
+                    "a {" +
+                    "color: #000;}" +
+                    ".chapterHeader {" +
+                    "color: #000;" +
+                    "background-color: #FFF;}" +
+                    ".chapterHeader .translation{" +
+                    "color: #000;" +
+                    "background-color: #FFF;}" +
+                    ".chapterHeader .count{" +
+                    "color: #000;" +
+                    "background-color: #FFF;}" +
+                    "</style>";
+            this.isNightModeOn = false;
+        }
+        if(currentChapter != -1) {
+            addCSSToXML(CSS, getCurrentChapterPath());
+            webView.reload();
+        }
+        for(int i = 0; i < contents.size(); i++) {
+            String path = getUnzippedDirectory() + "/" +
+                    getContentDir(new File(getUnzippedDirectory()).list()) + "/" +
+                    contents.get(i);
+            if (currentChapter != -1) {
+                if (path == getCurrentChapterPath()) {
+                    continue;
+                }
+            }
+            addCSSToXML(CSS, path);
+        }
+    }
     public String[] getContentOfNcxFile(String fileToBeParsed) {
         BufferedReader in = null;
         String[] stringArr;
