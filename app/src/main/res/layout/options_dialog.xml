@@ -132,11 +132,44 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_marginLeft="10dp"
+            android:text="View Annotations"
+            android:textSize="16dp"
+            android:textColor="#000"
+            android:layout_marginTop="10dp"
+            android:id="@+id/view_annotations_options_dialog"></TextView>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="10dp"
             android:text="Bookmark"
             android:textSize="16dp"
             android:textColor="#000"
             android:layout_marginTop="10dp"
             android:id="@+id/bookmark_options_dialog"></TextView>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider3"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="Text To Speech"
+            android:textSize="16dp"
+            android:textColor="#000"
+            android:id="@+id/text_to_speech_options_dialog"></TextView>
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
