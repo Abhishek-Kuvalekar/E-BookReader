@@ -15,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
@@ -71,6 +72,7 @@ public class EpubFile {
     private WebView webView;
     private int fontFamilyPosition;
     private boolean isNightModeOn;
+    private double brightness;
 
     public EpubFile(String fileName, Context context, View view) {
         this.context = context;
@@ -80,6 +82,7 @@ public class EpubFile {
         webView = (WebView) view.findViewById(R.id.webview);
         currentChapter = 0;
         this.isNightModeOn = false;
+        this.brightness = 0.5;
     }
 
     public void setFontFamilyPosition(int fontFamilyPosition) {
@@ -355,6 +358,16 @@ public class EpubFile {
         return this.isNightModeOn;
     }
 
+    public float getBrightness() {
+        return (float)this.brightness;
+    }
+
+    public void adjustBrightness(Window window, float value) {
+        WindowManager.LayoutParams layout = window.getAttributes();
+        layout.screenBrightness = value;
+        window.setAttributes(layout);
+        this.brightness = (double)value;
+    }
 
     public void addCSSToXML(String CSS, String filePath) {
         BufferedReader reader = null;

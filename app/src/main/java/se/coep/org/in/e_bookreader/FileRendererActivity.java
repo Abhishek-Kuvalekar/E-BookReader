@@ -26,6 +26,7 @@ import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -133,6 +134,25 @@ public class FileRendererActivity extends AppCompatActivity {
                         }
                     });
                     nightMode.setChecked(file.getNightModeState());
+
+                    SeekBar brightness = (SeekBar) optionsDialog.findViewById(R.id.brightness_seekbar_options_dialog);
+                    brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            file.adjustBrightness(getWindow(), (float) (progress/100.0));
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+
+                        }
+                    });
+                    brightness.setProgress((int)(file.getBrightness() * 100));
                     return true;
             }
             return super.onOptionsItemSelected(item);
