@@ -587,7 +587,9 @@ public class EpubFile {
                         stringBuilder.append(line);
                         stringBuilder.append(ls);
                     }
-
+                    if(reader != null) {
+                        reader.close();
+                    }
                     String content = stringBuilder.toString();
                     Log.v("filecontent", " "+content);
                     String finalContent;
@@ -597,6 +599,7 @@ public class EpubFile {
                     }else {
                         finalContent = content;
                     }
+
                     Log.v("finalcontent", " "+finalContent);
                     out = new PrintWriter(new BufferedWriter(new FileWriter(ncxFilePath)));
                     out.print(finalContent);
@@ -605,13 +608,13 @@ public class EpubFile {
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    if (reader != null) {
+                    /*if (reader != null) {
                         try {
                             reader.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    }
+                    }*/
                     if (out != null) {
                         out.close();
                     }
