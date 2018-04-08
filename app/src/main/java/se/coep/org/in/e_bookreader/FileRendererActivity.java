@@ -68,6 +68,7 @@ public class FileRendererActivity extends AppCompatActivity {
 
         if (fileName.endsWith("epub")) {
             file = new EpubFile(fileName, this, this.getWindow().getDecorView());
+            file.unzip();
             String ncxFilePath = file.getNcxFilePath();
             file.parse(ncxFilePath);
             file.open(this, this.getWindow().getDecorView(), false);

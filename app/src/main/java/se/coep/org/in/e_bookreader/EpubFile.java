@@ -79,7 +79,6 @@ public class EpubFile {
     private int fontFamilyPosition;
     private boolean isNightModeOn;
     private double brightness;
-    private String ncxFileLocation;
 
     public EpubFile(String fileName, Context context, View view) {
         this.context = context;
@@ -231,7 +230,6 @@ public class EpubFile {
     }
 
     public String getNcxFilePath() {
-        unzip();
         unzippedDir = getUnzippedDirectory();
         List<String> parsedContentList = parse(unzippedDir + "/" +
                 getContentDir(new File(unzippedDir).list()) + "/" +
@@ -239,7 +237,6 @@ public class EpubFile {
         String ncxFilePath = unzippedDir + "/" +
                 getContentDir(new File(unzippedDir).list()) + "/" +
                 getContentFile();
-        this.ncxFileLocation = ncxFilePath;
         return ncxFilePath;
     }
 
@@ -349,7 +346,7 @@ public class EpubFile {
 
     private String getCurrentChapterID() {
         try {
-            File file = new File(this.ncxFileLocation);
+            File file = new File(getNcxFilePath());
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = null;
             dBuilder = dbFactory.newDocumentBuilder();
