@@ -743,29 +743,24 @@ public class EpubFile {
             }
 
             String content = stringBuilder.toString();
-            //if(content.contains(highlighted) == true) {
-                String finalcontent = content;
-                String[] firstSecondhalf = content.split(highlighted, 2);
-                if(firstSecondhalf.length == 2) {
-                    finalcontent = firstSecondhalf[0] + "<span class=\"highlighted\">" + highlighted + "</span>" + firstSecondhalf[1];
-                }else if(firstSecondhalf.length == 1) {
-                    finalcontent = content;
-                }
-                String finalFinalcontent;
-                if(finalcontent.contains("<style>")) {
-                    String[] twohalves = finalcontent.split("</style>", 2);
-                    finalFinalcontent = twohalves[0]+".highlighted {background-color:yellow;}"+"\n</style>\n"+twohalves[1];
-                }else {
-                    String[] twohalves = finalcontent.split("</head>", 2);
-                    finalFinalcontent = twohalves[0]+"\n<style>\n.highlighted {background-color:yellow;}\n</style>\n</head>\n"+twohalves[1];
-                }
-                Log.v("highlighted", finalFinalcontent);
-                out = new PrintWriter(new BufferedWriter(new FileWriter(chapterPath)));
-                out.print(finalFinalcontent);
-            //}else {
-                //return "Cannot be highlighted!";
-            //}
-
+            String finalcontent = content;
+            String[] firstSecondhalf = content.split(highlighted, 2);
+            if(firstSecondhalf.length == 2) {
+                finalcontent = firstSecondhalf[0] + "<span class=\"highlighted\">" + highlighted + "</span>" + firstSecondhalf[1];
+            }else if(firstSecondhalf.length == 1) {
+                finalcontent = content;
+            }
+            String finalFinalcontent;
+            if(finalcontent.contains("<style>")) {
+                String[] twohalves = finalcontent.split("</style>", 2);
+                finalFinalcontent = twohalves[0]+".highlighted {background-color:yellow;}"+"\n</style>\n"+twohalves[1];
+            }else {
+                String[] twohalves = finalcontent.split("</head>", 2);
+                finalFinalcontent = twohalves[0]+"\n<style>\n.highlighted {background-color:yellow;}\n</style>\n</head>\n"+twohalves[1];
+            }
+            //Log.v("highlighted", finalFinalcontent);
+            out = new PrintWriter(new BufferedWriter(new FileWriter(chapterPath)));
+            out.print(finalFinalcontent);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -814,5 +809,9 @@ public class EpubFile {
                 }
             }
         }
+    }
+
+    public void searchPatternInDoc(String searchString) {
+
     }
 }

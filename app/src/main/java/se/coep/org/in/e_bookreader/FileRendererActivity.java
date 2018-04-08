@@ -197,6 +197,35 @@ public class FileRendererActivity extends AppCompatActivity {
                         }
                     });
 
+                    final TextView search = (TextView) optionsDialog.findViewById(R.id.search_options_dialog);
+                    search.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            final Dialog searchDialog = new Dialog(FileRendererActivity.this);
+                            searchDialog.setContentView(R.layout.view_search_dialog);
+                            searchDialog.show();
+
+                            TextView cancel = (TextView) searchDialog.findViewById(R.id.cancel_button_search_dialog);
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    searchDialog.hide();
+                                }
+                            });
+
+                            TextView save = (TextView) searchDialog.findViewById(R.id.search_button_search_dialog);
+                            save.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    EditText text = (EditText) searchDialog.findViewById(R.id.annotation_editext_annotate_dialog);
+                                    String note = String.valueOf(text.getText());
+                                    searchDialog.hide();
+                                    file.searchPatternInDoc(note);
+                                }
+                            });
+                        }
+                    });
+
                     return true;
             }
             return super.onOptionsItemSelected(item);

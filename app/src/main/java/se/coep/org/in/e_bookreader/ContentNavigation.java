@@ -59,9 +59,6 @@ public class ContentNavigation {
                         navigationView.getMenu().getItem(previousItem).setChecked(false);
                         previousItem = menuItem.getItemId();
                         mDrawerLayout.closeDrawers();
-                        // close drawer when item is tapped
-                        // Add code here to update the UI based on the item selected
-                        // For example, swap UI fragments here
                         file.setCurrentChapter(menuItem.getItemId());
                         file.open(context, view, true);
                         return true;
@@ -82,36 +79,6 @@ public class ContentNavigation {
                 MenuItem item = menu.add(1, i, 0, contentList.get(i));
                 if (bookmarkedChapters[i] != -1) {
                     item.setIcon(R.drawable.ic_turned_in);
-                }
-            }
-        }
-
-        BufferedReader reader = null;
-        PrintWriter out = null;
-        try {
-            reader = new BufferedReader(new FileReader(file.getNcxFilePath()));
-            String line = null;
-            StringBuilder stringBuilder = new StringBuilder();
-            String ls = System.getProperty("line.separator");
-
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append(ls);
-            }
-
-            String content = stringBuilder.toString();
-            Log.v("string", content);
-            String finalContent;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         }

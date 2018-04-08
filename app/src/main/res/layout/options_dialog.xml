@@ -146,6 +146,15 @@
             android:textColor="#000"
             android:layout_marginTop="10dp"
             android:id="@+id/bookmark_options_dialog"></TextView>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="Search"
+            android:textSize="16dp"
+            android:textColor="#000"
+            android:layout_marginTop="10dp"
+            android:id="@+id/search_options_dialog"></TextView>
     </LinearLayout>
 
     <View
