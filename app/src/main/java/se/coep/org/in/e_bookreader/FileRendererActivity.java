@@ -24,8 +24,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -93,11 +97,11 @@ public class FileRendererActivity extends AppCompatActivity {
                     optionsDialog.setContentView(R.layout.options_dialog);
                     optionsDialog.getWindow().setGravity(Gravity.RIGHT | Gravity.TOP);
                     optionsDialog.show();
+
                     final TextView fontSize = (TextView) optionsDialog.findViewById(R.id.font_size_options_dialog);
                     fontSize.setText(Integer.toString(file.getFontSize()));
                     ImageButton fontPlus = (ImageButton) optionsDialog.findViewById(R.id.plus_button_options_dialog);
                     ImageButton fontMinus = (ImageButton) optionsDialog.findViewById(R.id.minus_button_options_dialog);
-                    Spinner fontFamily = (Spinner) optionsDialog.findViewById(R.id.font_family_spinner_options_dialog);
                     fontPlus.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -112,15 +116,72 @@ public class FileRendererActivity extends AppCompatActivity {
                             fontSize.setText(Integer.toString(file.getFontSize()));
                         }
                     });
+
+                    Spinner fontFamily = (Spinner) optionsDialog.findViewById(R.id.font_family_spinner_options_dialog);
                     MyItemSelectedListener myItemSelectedListener = new MyItemSelectedListener(file, file.getFontFamilyPosition());
                     fontFamily.setOnItemSelectedListener(myItemSelectedListener);
                     fontFamily.setSelection(file.getFontFamilyPosition());
 
-                    final TextView bookmark = (TextView) optionsDialog.findViewById(R.id.bookmark_options_dialog);
-                    bookmark.setOnClickListener(new View.OnClickListener() {
+                    final Switch nightMode = (Switch) optionsDialog.findViewById(R.id.night_mode_switch_options_dialog);
+                    nightMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
-                        public void onClick(View view) {
-                            //file.addBookmark();
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            if(nightMode.isChecked()) {
+                                file.switchNightMode(true);
+                            }
+                            else {
+                                file.switchNightMode(false);
+                            }
+                        }
+                    });
+                    nightMode.setChecked(file.getNightModeState());
+
+                    SeekBar brightness = (SeekBar) optionsDialog.findViewById(R.id.brightness_seekbar_options_dialog);
+                    brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            file.adjustBrightness(getWindow(), (float) (progress/100.0));
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+
+                        }
+                    });
+                    brightness.setProgress((int)(file.getBrightness() * 100));
+
+                    final TextView annotate = (TextView) optionsDialog.findViewById(R.id.annotate_options_dialog);
+                    annotate.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            final Dialog annotateDialog = new Dialog(FileRendererActivity.this);
+                            annotateDialog.setContentView(R.layout.annotate_dialog);
+                            annotateDialog.show();
+
+                            TextView cancel = (TextView) annotateDialog.findViewById(R.id.cancel_button_annotate_dialog);
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    annotateDialog.hide();
+                                }
+                            });
+
+                            TextView save = (TextView) annotateDialog.findViewById(R.id.save_button_annotate_dialog);
+                            save.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    EditText text = (EditText) annotateDialog.findViewById(R.id.annotation_editext_annotate_dialog);
+                                    String note = String.valueOf(text.getText());
+                                    annotateDialog.hide();
+                                    file.addAnnotation(note);
+                                    //Toast.makeText(FileRendererActivity.this, note, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     });
                     return true;
@@ -196,5 +257,54 @@ public class FileRendererActivity extends AppCompatActivity {
             }
         });
         //new ToastMenuItemListener(this, mode, "Text Highlighted!", this.getWindow().getDecorView()));
+    }
+
+    private  class ToastMenuItemListener implements MenuItem.OnMenuItemClickListener {
+
+        private final Context context;
+        private final ActionMode actionMode;
+        private final String text;
+        private View view;
+
+        private ToastMenuItemListener(Context context, ActionMode actionMode, String text, View view) {
+            this.context = context;
+            this.actionMode = actionMode;
+            this.text = text;
+            this.view = view;
+        }
+
+        @TargetApi(Build.VERSION_CODES.KITKAT)
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+            final WebView webview = (WebView) view.findViewById(R.id.webview);
+            webview.getSettings().setJavaScriptEnabled(true);
+            webview.evaluateJavascript("(function() {return window.getSelection().toString()})()",
+                    new ValueCallback<String>() {
+                        @Override
+                        public void onReceiveValue(String s) {
+                            Log.v("select", s);
+                        }
+                    }
+            );
+            Menu menu = actionMode.getMenu();
+            menu.findItem(0).setChecked(true);
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            String pasteData = "";
+            ClipData.Item textItem = clipboard.getPrimaryClip().getItemAt(0);
+            pasteData = textItem.getText().toString();
+            Log.v("text", pasteData);
+            menu.findItem(0).setChecked(false);
+            webview.findAllAsync(pasteData);
+            try
+            {
+                Method m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
+                m.invoke(webview, true);
+            }
+            catch (Throwable ignored){}
+            actionMode.finish();
+            return true;
+        }
     }
 }
