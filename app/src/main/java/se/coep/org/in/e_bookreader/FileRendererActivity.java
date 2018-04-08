@@ -184,6 +184,27 @@ public class FileRendererActivity extends AppCompatActivity {
                             });
                         }
                     });
+
+                    TextView viewAnnotations = (TextView) optionsDialog.findViewById(R.id.view_annotations_options_dialog);
+                    viewAnnotations.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            final Dialog showAnnotationsDialog = new Dialog(FileRendererActivity.this);
+                            showAnnotationsDialog.setContentView(R.layout.view_annotation_dialog);
+                            showAnnotationsDialog.show();
+
+                            TextView note = (TextView) showAnnotationsDialog.findViewById(R.id.textView_view_annotaion_dialog);
+                            note.setText(file.getAnnotationForCurrentChapter());
+
+                            TextView ok = (TextView) showAnnotationsDialog.findViewById(R.id.ok_button_view_annotation_dialog);
+                            ok.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    showAnnotationsDialog.hide();
+                                }
+                            });
+                        }
+                    });
                     return true;
             }
             return super.onOptionsItemSelected(item);

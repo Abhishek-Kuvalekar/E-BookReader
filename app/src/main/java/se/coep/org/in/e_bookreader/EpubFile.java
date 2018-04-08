@@ -79,6 +79,7 @@ public class EpubFile {
     private int fontFamilyPosition;
     private boolean isNightModeOn;
     private double brightness;
+    private String ncxFileLocation;
 
     public EpubFile(String fileName, Context context, View view) {
         this.context = context;
@@ -238,6 +239,7 @@ public class EpubFile {
         String ncxFilePath = unzippedDir + "/" +
                 getContentDir(new File(unzippedDir).list()) + "/" +
                 getContentFile();
+        this.ncxFileLocation = ncxFilePath;
         return ncxFilePath;
     }
 
@@ -347,7 +349,7 @@ public class EpubFile {
 
     private String getCurrentChapterID() {
         try {
-            File file = new File(getNcxFilePath());
+            File file = new File(this.ncxFileLocation);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = null;
             dBuilder = dbFactory.newDocumentBuilder();
@@ -585,6 +587,7 @@ public class EpubFile {
         String id = getCurrentChapterID();
         String path = getAnnotationFilePath();
         if(new File(path).exists() == false) {
+            Toast.makeText(context, "file doesn't exist", Toast.LENGTH_SHORT).show();
             return "No Annotations have been created for this chapter.";
         }
         try {
@@ -597,6 +600,7 @@ public class EpubFile {
 
             NodeList nList = doc.getElementsByTagName(id);
             if(nList.getLength() == 0) {
+                Toast.makeText(context, "list length = 0", Toast.LENGTH_SHORT).show();
                 return "No Annotations have been created for this chapter.";
             }
             for(int i = 0; i < nList.getLength(); i++) {
@@ -615,6 +619,7 @@ public class EpubFile {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Toast.makeText(context, "outer", Toast.LENGTH_SHORT).show();
         return "No Annotations have been created for this chapter.";
     }
 
