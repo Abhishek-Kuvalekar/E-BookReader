@@ -68,10 +68,11 @@ public class FileRendererActivity extends AppCompatActivity {
 
         if (fileName.endsWith("epub")) {
             file = new EpubFile(fileName, this, this.getWindow().getDecorView());
+            file.unzip();
             String ncxFilePath = file.getNcxFilePath();
             file.parse(ncxFilePath);
+            file.addHighlightToCSS();
             file.open(this, this.getWindow().getDecorView(), false);
-            file.initializeForBookmark(ncxFilePath);
             ContentNavigation nav = new ContentNavigation("epub", this, this.getWindow().getDecorView());
             nav.addContent(file.getContentFile(), file);
         }
@@ -184,6 +185,18 @@ public class FileRendererActivity extends AppCompatActivity {
                             });
                         }
                     });
+
+                    TextView bookmark = (TextView) optionsDialog.findViewById(R.id.bookmark_options_dialog);
+                    bookmark.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Log.v("bookmark", "bookmarked");
+                            file.addBookmark();
+                            Toast.makeText(FileRendererActivity.this, "Chapter Bookmarked!", Toast.LENGTH_SHORT).show();
+                            optionsDialog.hide();
+                        }
+                    });
+
                     return true;
             }
             return super.onOptionsItemSelected(item);
@@ -215,12 +228,6 @@ public class FileRendererActivity extends AppCompatActivity {
 
         menu.add(0, 5, 0, "Highlight");
 
-        //menu.findItem(R.id.copy).setOnMenuItemClickListener(new ToastMenuItemListener(this, mode, "One!", this.getWindow().getDecorView()));
-        //menu.findItem(R.id.select_all).setOnMenuItemClickListener(new ToastMenuItemListener(this, mode, "Two!", this.getWindow().getDecorView()));
-        Log.v("text1", String.valueOf(menu.getItem(0).getTitle()));
-        Log.v("text1", String.valueOf(menu.getItem(1).getTitle()));
-        Log.v("text1", String.valueOf(menu.getItem(2).getTitle()));
-
         menu.getItem(0).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @TargetApi(Build.VERSION_CODES.KITKAT)
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -236,8 +243,9 @@ public class FileRendererActivity extends AppCompatActivity {
                                 Log.v("select", s);
                                 pasteData = s;
                                 String data = pasteData.substring(1, pasteData.length()-1);
+                                file.highlightDocument(data);
                                 Log.v("select", data);
-                                webview.findAllAsync(data);
+                                /*webview.findAllAsync(data);
                                 Method m = null;
                                 try {
                                     m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
@@ -248,7 +256,7 @@ public class FileRendererActivity extends AppCompatActivity {
                                     e.printStackTrace();
                                 } catch (InvocationTargetException e) {
                                     e.printStackTrace();
-                                }
+                                }*/
                             }
                         }
                 );
@@ -256,55 +264,6 @@ public class FileRendererActivity extends AppCompatActivity {
                 return true;
             }
         });
-        //new ToastMenuItemListener(this, mode, "Text Highlighted!", this.getWindow().getDecorView()));
-    }
 
-    private  class ToastMenuItemListener implements MenuItem.OnMenuItemClickListener {
-
-        private final Context context;
-        private final ActionMode actionMode;
-        private final String text;
-        private View view;
-
-        private ToastMenuItemListener(Context context, ActionMode actionMode, String text, View view) {
-            this.context = context;
-            this.actionMode = actionMode;
-            this.text = text;
-            this.view = view;
-        }
-
-        @TargetApi(Build.VERSION_CODES.KITKAT)
-        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-            Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
-            final WebView webview = (WebView) view.findViewById(R.id.webview);
-            webview.getSettings().setJavaScriptEnabled(true);
-            webview.evaluateJavascript("(function() {return window.getSelection().toString()})()",
-                    new ValueCallback<String>() {
-                        @Override
-                        public void onReceiveValue(String s) {
-                            Log.v("select", s);
-                        }
-                    }
-            );
-            Menu menu = actionMode.getMenu();
-            menu.findItem(0).setChecked(true);
-            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            String pasteData = "";
-            ClipData.Item textItem = clipboard.getPrimaryClip().getItemAt(0);
-            pasteData = textItem.getText().toString();
-            Log.v("text", pasteData);
-            menu.findItem(0).setChecked(false);
-            webview.findAllAsync(pasteData);
-            try
-            {
-                Method m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
-                m.invoke(webview, true);
-            }
-            catch (Throwable ignored){}
-            actionMode.finish();
-            return true;
-        }
     }
 }

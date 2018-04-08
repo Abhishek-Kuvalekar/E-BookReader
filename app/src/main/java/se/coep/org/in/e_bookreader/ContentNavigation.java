@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -70,12 +71,19 @@ public class ContentNavigation {
 
         Menu menu = navigationView.getMenu();
         List<String> contentList = file.parseForContent(file.getNcxFilePath());
-        //List<String> bookmarkList = file.parseForBookmarks(file.getNcxFilePath());
-        for(int i=0; i<contentList.size(); i++) {
-            MenuItem item = menu.add(1, i, 0, contentList.get(i));
-            //if(bookmarkList.get(i) != null) {
-             //   item.setIcon(R.drawable.ic_turned_in);
-           // }
+        int[] bookmarkedChapters = file.getBookmarks(contentList);
+        if(bookmarkedChapters == null) {
+            Toast.makeText(context, "No Bookmarks yet!", Toast.LENGTH_SHORT).show();
+            for (int i = 0; i < contentList.size(); i++) {
+                MenuItem item = menu.add(1, i, 0, contentList.get(i));
+            }
+        }else {
+            for (int i = 0; i < contentList.size(); i++) {
+                MenuItem item = menu.add(1, i, 0, contentList.get(i));
+                if (bookmarkedChapters[i] != -1) {
+                    item.setIcon(R.drawable.ic_turned_in);
+                }
+            }
         }
 
         BufferedReader reader = null;

@@ -10,9 +10,12 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -23,6 +26,7 @@ import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -230,7 +234,7 @@ public class EpubFile {
     }
 
     public String getNcxFilePath() {
-        unzip();
+        //unzip();
         unzippedDir = getUnzippedDirectory();
         List<String> parsedContentList = parse(unzippedDir + "/" +
                 getContentDir(new File(unzippedDir).list()) + "/" +
@@ -532,6 +536,10 @@ public class EpubFile {
         return getUnzippedDirectory() + "/" + getContentDir(new File(getUnzippedDirectory()).list()) + "/" + "annotations.xml";
     }
 
+    public String getBookmarkFilePath() {
+        return getUnzippedDirectory() + "/" + getContentDir(new File(getUnzippedDirectory()).list()) + "/" + "bookmarks.xml";
+    }
+
     public void addAnnotation(String content) {
         String path = getAnnotationFilePath();
         try {
@@ -585,7 +593,7 @@ public class EpubFile {
         String id = getCurrentChapterID();
         String path = getAnnotationFilePath();
         if(new File(path).exists() == false) {
-            return "No Annotations have been created for this chapter.";
+            return "No Annotations have been created for this book.";
         }
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -618,73 +626,193 @@ public class EpubFile {
         return "No Annotations have been created for this chapter.";
     }
 
-    public String[] getContentOfNcxFile(String fileToBeParsed) {
-        BufferedReader in = null;
-        String[] stringArr;
+    public void addBookmark() {
+        String path = getBookmarkFilePath();
         try {
-            in = new BufferedReader(    new InputStreamReader( new FileInputStream(fileToBeParsed)));
-            String str;
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Element rootElement, noteElement;
 
-            List<String> list = new ArrayList<String>();
-            while((str = in.readLine()) != null){
-                list.add(str);
+            Document doc;
+            if(new File(path).exists() == false) {
+                doc = docBuilder.newDocument();
+                rootElement = doc.createElement("Bookmark");
+                doc.appendChild(rootElement);
             }
-            stringArr = list.toArray(new String[0]);
-            return stringArr;
+            else {
+                doc = docBuilder.parse(new File(path));
+                rootElement = (Element) doc.getElementsByTagName("Bookmark").item(0);
+            }
+
+            int id = currentChapter;
+            Log.v("current", String.valueOf(id));
+            final NavigationView navigationView = (NavigationView)view.findViewById(R.id.nav_view);
+            Menu menu = navigationView.getMenu();
+            MenuItem item = menu.getItem(id);
+            Log.v("item", String.valueOf(item.getItemId()));
+            item.setIcon(R.drawable.ic_turned_in);
+
+            if(rootElement == null) {
+                Log.d("Bookmark", "null root");
+            }
+            noteElement = doc.createElement("Chapter");
+            rootElement.appendChild(noteElement);
+
+            Attr attr = doc.createAttribute("id");
+            attr.setValue(String.valueOf(id));
+            noteElement.setAttributeNode(attr);
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File(path));
+            transformer.transform(source, result);
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int[] getBookmarks(List<String> contentList) {
+        int[] array = new int[contentList.size()];
+        String path = getBookmarkFilePath();
+        if(new File(path).exists() == false) {
+           return null;
+        }
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.parse(new File(path));
+            StringBuilder content = new StringBuilder("");
+
+            doc.getDocumentElement().normalize();
+            NodeList nList = doc.getElementsByTagName("Chapter");
+
+            for(int i = 0; i < contentList.size(); i++) {
+                Node nNode = nList.item(i);
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    int pos = Integer.parseInt(eElement.getAttribute("id"));
+                    if(pos == i) {
+                        array[i] = pos;
+                    }else {
+                        array[i] = -1;
+                    }
+                }
+            }
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return array;
+    }
+    public void highlightDocument(String data) {
+        int id = currentChapter;
+        String chapterName = contents.get(id);
+        Log.v("highlight", data);
+        String notification = parseCurrentChapter(chapterName, data);
+        if(notification == "highlighted") {
+             open(context, view, true);
+        }
+        Log.v("highlight", notification);
+    }
+
+    public String parseCurrentChapter(String chapterName, String highlighted) {
+        String chapterPath = getUnzippedDirectory() + "/" + getContentDir(new File(getUnzippedDirectory()).list()) + "/" + chapterName;
+        BufferedReader reader = null;
+        PrintWriter out = null;
+        try {
+            reader = new BufferedReader(new FileReader(chapterPath));
+            String line = null;
+            StringBuilder stringBuilder = new StringBuilder();
+            String ls = System.getProperty("line.separator");
+
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(ls);
+            }
+
+            String content = stringBuilder.toString();
+            //if(content.contains(highlighted) == true) {
+                String finalcontent = content;
+                String[] firstSecondhalf = content.split(highlighted, 2);
+                if(firstSecondhalf.length == 2) {
+                    finalcontent = firstSecondhalf[0] + "<span class=\"highlighted\">" + highlighted + "</span>" + firstSecondhalf[1];
+                }else if(firstSecondhalf.length == 1) {
+                    finalcontent = content;
+                }
+                String finalFinalcontent;
+                if(finalcontent.contains("<style>")) {
+                    String[] twohalves = finalcontent.split("</style>", 2);
+                    finalFinalcontent = twohalves[0]+".highlighted {background-color:yellow;}"+"\n</style>\n"+twohalves[1];
+                }else {
+                    String[] twohalves = finalcontent.split("</head>", 2);
+                    finalFinalcontent = twohalves[0]+"\n<style>\n.highlighted {background-color:yellow;}\n</style>\n</head>\n"+twohalves[1];
+                }
+                Log.v("highlighted", finalFinalcontent);
+                out = new PrintWriter(new BufferedWriter(new FileWriter(chapterPath)));
+                out.print(finalFinalcontent);
+            //}else {
+                //return "Cannot be highlighted!";
+            //}
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        return null;
-    }
-
-    public String[] addAttributeForBookmark(String ncxFilePath) {
-        String[] array = getContentOfNcxFile(ncxFilePath);
-        String [] newArray = new String[array.length];
-        for(int i=0; i<array.length; i++) {
-            if(array[i].contains("<navPoint")) {
-               newArray[i] = array[i].replaceFirst("<navPoint", "<navPoint bookmark=1");
-            }else {
-                newArray[i] = array[i];
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            Log.v("content", " "+newArray[i]);
-        }
-
-        FileWriter fw = null;
-        try {
-            File file = new File(unzipLocation.toString() + "/unzipped/test.xml");
-            fw = new FileWriter(file);
-            for (int i = 0; i < newArray.length; i++) {
-                fw.write(newArray[i] + "\n");
+            if (out != null) {
+                out.close();
             }
-            fw.close();
-            Log.v("file", "written");
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return newArray;
+        return "highlighted";
     }
 
-    public void makeFile(String[] buffer) {
-        for(int i = 0; i<buffer.length; i++) {
-            Log.v("check", ""+buffer[i]);
-        }
+    public void addHighlightToCSS() {
+        String CSSDir = getCSSDirectory();
+        File file = new File(CSSDir);
+        if(!file.exists()) {
+            Toast.makeText(context, "Cannot be highlighted!", Toast.LENGTH_SHORT).show();
+        }else {
+            String[] cddFiles = file.list();
+            for(String css : cddFiles) {
+                if(css.endsWith(".css")) {
+                    Log.v("cssfiles", css);
+                    BufferedWriter bw = null;
 
-        File temp = new File(getUnzippedDirectory()+"/test.xml");
-        FileWriter fw = null;
-        try {
-            fw = new FileWriter(temp);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(java.util.Arrays.toString(buffer));
-            Log.v("file","written");
-        } catch (IOException e) {
-            e.printStackTrace();
+                    try {
+                        bw = new BufferedWriter(new FileWriter(CSSDir+"/"+css, true));
+                        bw.newLine();
+                        bw.write(".highlighted {background-color: yellow;}");
+                        bw.newLine();
+                        bw.flush();
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    } finally {
+                        if (bw != null) try {
+                            bw.close();
+                        } catch (IOException ioe2) {
+                        }
+                    }
+                }
+            }
         }
-    }
-
-    public void initializeForBookmark(String ncxFilePath) {
-        String[] arr = addAttributeForBookmark(ncxFilePath);
-        //makeFile(arr);
     }
 }
