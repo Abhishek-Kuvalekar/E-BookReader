@@ -25,6 +25,7 @@ import android.view.View;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -153,6 +154,36 @@ public class FileRendererActivity extends AppCompatActivity {
                         }
                     });
                     brightness.setProgress((int)(file.getBrightness() * 100));
+
+                    final TextView annotate = (TextView) optionsDialog.findViewById(R.id.annotate_options_dialog);
+                    annotate.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            final Dialog annotateDialog = new Dialog(FileRendererActivity.this);
+                            annotateDialog.setContentView(R.layout.annotate_dialog);
+                            annotateDialog.show();
+
+                            TextView cancel = (TextView) annotateDialog.findViewById(R.id.cancel_button_annotate_dialog);
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    annotateDialog.hide();
+                                }
+                            });
+
+                            TextView save = (TextView) annotateDialog.findViewById(R.id.save_button_annotate_dialog);
+                            save.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    EditText text = (EditText) annotateDialog.findViewById(R.id.annotation_editext_annotate_dialog);
+                                    String note = String.valueOf(text.getText());
+                                    annotateDialog.hide();
+                                    file.addAnnotation(note);
+                                    //Toast.makeText(FileRendererActivity.this, note, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    });
                     return true;
             }
             return super.onOptionsItemSelected(item);

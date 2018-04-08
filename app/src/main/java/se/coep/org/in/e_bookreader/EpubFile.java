@@ -53,6 +53,12 @@ import java.util.NavigableMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Created by dell on 19/3/18.
@@ -339,6 +345,40 @@ public class EpubFile {
         }
     }
 
+    private String getCurrentChapterID() {
+        try {
+            File file = new File(getNcxFilePath());
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = null;
+            dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+
+            doc.getDocumentElement().normalize();
+
+            NodeList nList = doc.getElementsByTagName("navPoint");
+
+            for(int temp = 0; temp < nList.getLength(); temp++) {
+                Node nNode = nList.item(temp);
+                if(nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    int pos = Integer.parseInt(eElement.getAttribute("playOrder")) - 1;
+                    if(pos == currentChapter) {
+                        String id = eElement.getAttribute("id");
+                        return id;
+                    }
+                }
+            }
+
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public void changeFontSize(boolean isToBeIncreased) {
         if(isToBeIncreased == true && fontSize != 24) {
             this.fontSize++;
@@ -487,6 +527,97 @@ public class EpubFile {
             addCSSToXML(CSS, path);
         }
     }
+
+    public String getAnnotationFilePath() {
+        return getUnzippedDirectory() + "/" + getContentDir(new File(getUnzippedDirectory()).list()) + "/" + "annotations.xml";
+    }
+
+    public void addAnnotation(String content) {
+        String path = getAnnotationFilePath();
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Element rootElement, noteElement;
+
+            Document doc;
+            if(new File(path).exists() == false) {
+                doc = docBuilder.newDocument();
+                rootElement = doc.createElement("annotation");
+                doc.appendChild(rootElement);
+            }
+            else {
+                doc = docBuilder.parse(new File(path));
+                rootElement = (Element) doc.getElementsByTagName("annotation").item(0);
+            }
+
+            String id = getCurrentChapterID();
+            if(id == null) {
+                Toast.makeText(context, "Annotation could not be added.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if(rootElement == null) {
+                Log.d("Annotaition", "null root");
+            }
+            noteElement = doc.createElement(id);
+            noteElement.setTextContent(content);
+            rootElement.appendChild(noteElement);
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File(path));
+            transformer.transform(source, result);
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getAnnotationForCurrentChapter() {
+        String id = getCurrentChapterID();
+        String path = getAnnotationFilePath();
+        if(new File(path).exists() == false) {
+            return "No Annotations have been created for this chapter.";
+        }
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.parse(new File(path));
+            StringBuilder content = new StringBuilder("");
+
+            doc.getDocumentElement().normalize();
+
+            NodeList nList = doc.getElementsByTagName(id);
+            if(nList.getLength() == 0) {
+                return "No Annotations have been created for this chapter.";
+            }
+            for(int i = 0; i < nList.getLength(); i++) {
+                Node node = nList.item(i);
+                if(node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) node;
+                    content.append(element.getTextContent());
+                }
+                content.append("\n----------\n");
+            }
+            return String.valueOf(content);
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "No Annotations have been created for this chapter.";
+    }
+
     public String[] getContentOfNcxFile(String fileToBeParsed) {
         BufferedReader in = null;
         String[] stringArr;
