@@ -69,6 +69,7 @@ public class EpubFile {
     private int fontSize = 18;
     private WebView webView;
     private int fontFamilyPosition;
+    private boolean firstTimeFlag=false;
 
     public EpubFile(String fileName, Context context, View view) {
         this.context = context;
@@ -175,6 +176,56 @@ public class EpubFile {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return navList;
+    }
+
+    public List<String> parseForBookmarks(String fileToBeParsed) {
+        List<String> navList = new ArrayList<String>();
+        try {
+            File inputFile = new File(fileToBeParsed);
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(inputFile);
+            doc.getDocumentElement().normalize();
+            NodeList nList = doc.getElementsByTagName("navPoint");
+
+            for(int temp = 0; temp < nList.getLength(); temp++) {
+                Node nNode = nList.item(temp);
+                if(nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    int pos = Integer.parseInt(eElement.getAttribute("playOrder")) - 1;
+                        boolean b = eElement.hasAttribute("bookmarks");
+                        Log.v("isbookmark", String.valueOf(b));
+                        int bookmark = Integer.parseInt(eElement.getAttribute("bookmarks"));
+                        Element node = (Element) eElement.getElementsByTagName("content").item(0);
+                        String chapter = node.getAttribute("src");
+                        if (chapter.startsWith("OEBPS/")) {
+                            if (bookmark == 1) {
+                                Log.v("bookmark", "chapter " + chapter);
+
+                                String[] chapterName = chapter.split("/", 2);
+                                Log.d("tag", chapterName[1]);
+                                navList.add(pos, chapterName[1]);
+                            }else {
+                                navList.add(pos, null);
+                            }
+                        } else {
+                            if(bookmark == 1) {
+                                navList.add(pos, chapter);
+                            }else {
+                                navList.add(pos, null);
+                            }
+                        }
+                }
+            }
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //this.contents = navList;
         return navList;
     }
 
@@ -436,47 +487,145 @@ public class EpubFile {
         String [] newArray = new String[array.length];
         for(int i=0; i<array.length; i++) {
             if(array[i].contains("<navPoint")) {
-               newArray[i] = array[i].replaceFirst("<navPoint", "<navPoint bookmark=1");
+               newArray[i] = array[i].replaceFirst("<navPoint", "<navPoint bookmark=\"1\"");
             }else {
                 newArray[i] = array[i];
             }
             Log.v("content", " "+newArray[i]);
         }
 
-        FileWriter fw = null;
+        FileOutputStream outputStream;
         try {
-            File file = new File(unzipLocation.toString() + "/unzipped/test.xml");
-            fw = new FileWriter(file);
-            for (int i = 0; i < newArray.length; i++) {
-                fw.write(newArray[i] + "\n");
+            String fileNcx = getContentFile();
+            Log.v("filename", getContentFile());
+            Log.v("filename", getUnzippedDirectory()+"/"+getContentDir(new File(getUnzippedDirectory()).list()));
+            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/unzipped/", "bookmarks.ncx");
+            outputStream = new FileOutputStream(file, true);
+            if(file.canWrite()) {
+                Log.v("write", "write");
             }
-            fw.close();
-            Log.v("file", "written");
-        } catch (IOException e) {
+            Log.v("length", String.valueOf(newArray.length));
+            for(int i = 0; i<newArray.length; i++) {
+                outputStream.write((newArray[i]).getBytes());
+                outputStream.write('\n');
+                //outputStream.flush();
+                Log.v("file", "done");
+            }
+            outputStream.close();
+        } catch (Exception e) {
             e.printStackTrace();
+        }
+        String rootDir = getUnzippedDirectory();
+        String[] files = new File(rootDir).list();
+        for(String fileName : files) {
+            if(fileName.endsWith("ncx")) {
+                Log.d("name", fileName);
+            }
         }
         return newArray;
     }
 
-    public void makeFile(String[] buffer) {
-        for(int i = 0; i<buffer.length; i++) {
-            Log.v("check", ""+buffer[i]);
+    /*public String getBookmarksFilePath() {
+        String rootDir = Environment.getExternalStorageDirectory().toString()+"/unzipped";
+        String[] files = new File(rootDir).list();
+        for(String fileName : files) {
+            if(fileName.endsWith("ncx")) {
+                Log.d("name", fileName);
+                return rootDir+"/"+fileName;
+            }
         }
+        return null;
+    }*/
 
-        File temp = new File(getUnzippedDirectory()+"/test.xml");
-        FileWriter fw = null;
+    public void addBookmarks(String filename, int currentChapter) {
+            List<String> navList = new ArrayList<String>();
         try {
-            fw = new FileWriter(temp);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(java.util.Arrays.toString(buffer));
-            Log.v("file","written");
+            File inputFile = new File(filename);
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(inputFile);
+            doc.getDocumentElement().normalize();
+            NodeList nList = doc.getElementsByTagName("navPoint");
+
+            for(int temp = 0; temp < nList.getLength(); temp++) {
+                Node nNode = nList.item(temp);
+                if(nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    int pos = Integer.parseInt(eElement.getAttribute("playOrder")) - 1;
+                    if(pos == currentChapter) {
+                        int bookmark = Integer.parseInt(eElement.getAttribute("bookmarks"));
+                        if (bookmark != 1) {
+                            eElement.setAttribute("bookmarks", "0");
+                            Log.v("attribute", "chapter "+String.valueOf(pos)+" bookmarked");
+                        }
+                    }
+                }
+            }
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void initializeForBookmark(String ncxFilePath) {
-        String[] arr = addAttributeForBookmark(ncxFilePath);
-        //makeFile(arr);
+        if(firstTimeFlag == false) {
+            Log.v("here", "here "+ ncxFilePath);
+            File file = new File(ncxFilePath);
+            if (file.exists()) {
+                BufferedReader reader = null;
+                PrintWriter out = null;
+                try {
+                    reader = new BufferedReader(new FileReader(ncxFilePath));
+                    String line = null;
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String ls = System.getProperty("line.separator");
+
+                    while ((line = reader.readLine()) != null) {
+                        stringBuilder.append(line);
+                        stringBuilder.append(ls);
+                    }
+
+                    String content = stringBuilder.toString();
+                    Log.v("filecontent", " "+content);
+                    String finalContent;
+                    if(content.contains("<navPoint")) {
+                        Log.v("ithe", "ithe");
+                        finalContent = content.replaceAll("<navPoint", "<navPoint bookmarks=\"0\"");
+                    }else {
+                        finalContent = content;
+                    }
+                    Log.v("finalcontent", " "+finalContent);
+                    out = new PrintWriter(new BufferedWriter(new FileWriter(ncxFilePath)));
+                    out.print(finalContent);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (out != null) {
+                        out.close();
+                    }
+                }
+
+            }
+            firstTimeFlag = true;
+        }
+        else {
+            //String[] arr = addAttributeForBookmark(ncxFilePath);
+        }
     }
+
+   /* public void addBookmark() {
+        addBookmarks(getBookmarksFilePath(), currentChapter);
+    }*/
 }

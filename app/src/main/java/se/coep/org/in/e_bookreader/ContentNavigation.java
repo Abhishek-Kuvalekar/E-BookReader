@@ -1,12 +1,19 @@
 package se.coep.org.in.e_bookreader;
 
 import android.content.Context;
+import android.os.Environment;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.interfaces.ECPublicKey;
 import java.util.List;
 
@@ -63,8 +70,42 @@ public class ContentNavigation {
 
         Menu menu = navigationView.getMenu();
         List<String> contentList = file.parseForContent(file.getNcxFilePath());
+        //List<String> bookmarkList = file.parseForBookmarks(file.getNcxFilePath());
         for(int i=0; i<contentList.size(); i++) {
-            menu.add(1, i, 0, contentList.get(i));
+            MenuItem item = menu.add(1, i, 0, contentList.get(i));
+            //if(bookmarkList.get(i) != null) {
+             //   item.setIcon(R.drawable.ic_turned_in);
+           // }
+        }
+
+        BufferedReader reader = null;
+        PrintWriter out = null;
+        try {
+            reader = new BufferedReader(new FileReader(file.getNcxFilePath()));
+            String line = null;
+            StringBuilder stringBuilder = new StringBuilder();
+            String ls = System.getProperty("line.separator");
+
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(ls);
+            }
+
+            String content = stringBuilder.toString();
+            Log.v("string", content);
+            String finalContent;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
