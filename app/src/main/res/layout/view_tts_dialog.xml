@@ -92,16 +92,7 @@
             android:gravity="center"
             android:id="@+id/start_tts_dialog"
             ></TextView>
-        <TextView
-            android:layout_height="match_parent"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:text="Pause"
-            android:textSize="16dp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:id="@+id/pause_tts_dialog"
-            ></TextView>
+
         <TextView
             android:layout_height="match_parent"
             android:layout_width="0dp"
