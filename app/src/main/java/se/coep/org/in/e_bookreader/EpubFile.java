@@ -3,27 +3,23 @@ package se.coep.org.in.e_bookreader;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.w3c.dom.Attr;
@@ -36,24 +32,16 @@ import org.xml.sax.SAXException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.NavigableMap;
+import java.util.Locale;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -85,6 +73,7 @@ public class EpubFile {
     private boolean isNightModeOn;
     private double brightness;
     private String stringToBeSearched = null;
+    private TextToSpeech tts;
 
     public EpubFile(String fileName, Context context, View view) {
         this.context = context;
@@ -95,6 +84,7 @@ public class EpubFile {
         currentChapter = 0;
         this.isNightModeOn = false;
         this.brightness = 0.5;
+        this.tts = null;
     }
 
     public void setFontFamilyPosition(int fontFamilyPosition) {
@@ -832,5 +822,74 @@ public class EpubFile {
             Method m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
             m.invoke(mWebView, true);
         }catch(Exception ignored){}
+    }
+
+    public void startTTS(final float speed, final float pitch) {
+        tts=new TextToSpeech(getActivity().getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void onInit(final int status) {
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(status != TextToSpeech.ERROR && status == TextToSpeech.SUCCESS) {
+                            if(tts.isLanguageAvailable(Locale.getDefault()) == TextToSpeech.LANG_AVAILABLE) {
+                                tts.setLanguage(Locale.getDefault());
+                            }else {
+                                Set<Locale> list=  tts.getAvailableLanguages();
+                                Log.v("available", list.toString());
+                                Log.v("language", "Not there");
+                            }
+                        }
+                        tts.setSpeechRate(speed);
+                        tts.setPitch(pitch);
+                        String content = "Hello";//getBodyContent();
+                        Log.v("Sherlock", content);
+                        if(content != null) {
+                            tts.speak("Hello", TextToSpeech.QUEUE_FLUSH, null);
+                            content = "world";
+                            tts.speak(content, TextToSpeech.QUEUE_FLUSH, null);
+                        }else {
+                            Toast.makeText(context, "Cannot get text from file.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }, 500);
+            }
+        });
+    }
+
+    public void stopTTS() {
+        if(tts !=null){
+            tts.stop();
+            tts.shutdown();
+            tts = null;
+        }
+    }
+
+    public String getBodyContent() {
+        if(currentChapter == -1) {
+            return null;
+        }
+        try {
+            File file = new File(getCurrentChapterPath());
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+            doc.getDocumentElement().normalize();
+
+            NodeList headList = doc.getElementsByTagName("body");
+            String title = headList.item(0).getTextContent();
+            return title;
+
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

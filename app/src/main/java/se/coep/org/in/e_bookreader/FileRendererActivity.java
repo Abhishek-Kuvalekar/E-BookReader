@@ -246,6 +246,45 @@ public class FileRendererActivity extends AppCompatActivity {
                                     file.searchPatternInDoc(note);
                                 }
                             });
+
+                        }
+                    });
+
+                    TextView textToSpeech = (TextView) optionsDialog.findViewById(R.id.text_to_speech_options_dialog);
+                    textToSpeech.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Dialog ttsDialog = new Dialog(FileRendererActivity.this);
+                            ttsDialog.setContentView(R.layout.view_tts_dialog);
+                            ttsDialog.show();
+
+                            final SeekBar speed = (SeekBar) ttsDialog.findViewById(R.id.speed_tts_dialog);
+                            speed.setProgress(50);
+
+                            final SeekBar pitch = (SeekBar) ttsDialog.findViewById(R.id.pitch_tts_dialog);
+                            pitch.setProgress(50);
+
+                            final TextView start = (TextView) ttsDialog.findViewById(R.id.start_tts_dialog);
+                            start.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    start.setEnabled(false);
+                                    file.startTTS((float)(speed.getProgress()/50.0), (float)(pitch.getProgress()/50.0));
+                                    speed.setEnabled(false);
+                                    pitch.setEnabled(false);
+                                }
+                            });
+
+                            TextView stop = (TextView) ttsDialog.findViewById(R.id.stop_tts_dialog);
+                            stop.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    file.stopTTS();
+                                    start.setEnabled(true);
+                                    speed.setEnabled(true);
+                                    pitch.setEnabled(true);
+                                }
+                            });
                         }
                     });
 
@@ -316,55 +355,12 @@ public class FileRendererActivity extends AppCompatActivity {
                 return true;
             }
         });
-        //new ToastMenuItemListener(this, mode, "Text Highlighted!", this.getWindow().getDecorView()));
     }
 
-    private  class ToastMenuItemListener implements MenuItem.OnMenuItemClickListener {
-
-        private final Context context;
-        private final ActionMode actionMode;
-        private final String text;
-        private View view;
-
-        private ToastMenuItemListener(Context context, ActionMode actionMode, String text, View view) {
-            this.context = context;
-            this.actionMode = actionMode;
-            this.text = text;
-            this.view = view;
-        }
-
-        @TargetApi(Build.VERSION_CODES.KITKAT)
-        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-            Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
-            final WebView webview = (WebView) view.findViewById(R.id.webview);
-            webview.getSettings().setJavaScriptEnabled(true);
-            webview.evaluateJavascript("(function() {return window.getSelection().toString()})()",
-                    new ValueCallback<String>() {
-                        @Override
-                        public void onReceiveValue(String s) {
-                            Log.v("select", s);
-                        }
-                    }
-            );
-            Menu menu = actionMode.getMenu();
-            menu.findItem(0).setChecked(true);
-            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            String pasteData = "";
-            ClipData.Item textItem = clipboard.getPrimaryClip().getItemAt(0);
-            pasteData = textItem.getText().toString();
-            Log.v("text", pasteData);
-            menu.findItem(0).setChecked(false);
-            webview.findAllAsync(pasteData);
-            try
-            {
-                Method m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
-                m.invoke(webview, true);
-            }
-            catch (Throwable ignored){}
-            actionMode.finish();
-            return true;
-        }
+    @Override
+    public void onPause() {
+        super.onPause();
+        file.stopTTS();
     }
+
 }

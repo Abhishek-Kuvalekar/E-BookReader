@@ -150,8 +150,7 @@
             android:textSize="16dp"
             android:textColor="#000"
             android:layout_marginTop="10dp"
-            android:id="@+id/bookmark_options_dialog"
-            android:clickable="true"></TextView>
+            android:clickable="true"
             android:id="@+id/bookmark_options_dialog"></TextView>
         <TextView
             android:layout_height="wrap_content"
