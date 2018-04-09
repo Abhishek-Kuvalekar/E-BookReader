@@ -20,6 +20,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.w3c.dom.Attr;
@@ -845,12 +846,12 @@ public class EpubFile {
                         }
                         tts.setSpeechRate(speed);
                         tts.setPitch(pitch);
-                        String content = "Hello";//getBodyContent();
-                        Log.v("Sherlock", content);
+                        List<String> content = getBodyContent();
+                        //Log.v("Sherlock", content);
                         if(content != null) {
-                            tts.speak("Hello", TextToSpeech.QUEUE_FLUSH, null);
-                            content = "world";
-                            tts.speak(content, TextToSpeech.QUEUE_FLUSH, null);
+                            for(int i = 0; i < content.size(); i++) {
+                                tts.speak(content.get(i), TextToSpeech.QUEUE_ADD, null);
+                            }
                         }else {
                             Toast.makeText(context, "Cannot get text from file.", Toast.LENGTH_SHORT).show();
                         }
@@ -868,10 +869,11 @@ public class EpubFile {
         }
     }
 
-    public String getBodyContent() {
+    public List<String> getBodyContent() {
         if(currentChapter == -1) {
             return null;
         }
+        List<String> chapterContent = new ArrayList<String>();
         try {
             File file = new File(getCurrentChapterPath());
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -879,9 +881,85 @@ public class EpubFile {
             Document doc = dBuilder.parse(file);
             doc.getDocumentElement().normalize();
 
-            NodeList headList = doc.getElementsByTagName("body");
-            String title = headList.item(0).getTextContent();
-            return title;
+            if ((doc.getElementsByTagName("h1").item(0) != null)) {
+                chapterContent.add(doc.getElementsByTagName("h1").item(0).getTextContent());
+                if ((doc.getElementsByTagName("h2").item(0) != null)) {
+                    chapterContent.add(doc.getElementsByTagName("h2").item(0).getTextContent());
+                    if ((doc.getElementsByTagName("b").item(0) != null)) {
+                        chapterContent.add(doc.getElementsByTagName("b").item(0).getTextContent());
+                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
+                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
+                        }
+                    }
+                    else {
+                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
+                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
+                        }
+                    }
+                }
+                else {
+                    if ((doc.getElementsByTagName("b").item(0) != null)) {
+                        chapterContent.add(doc.getElementsByTagName("b").item(0).getTextContent());
+                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
+                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
+                        }
+                    }
+                    else {
+                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
+                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
+                        }
+                    }
+                }
+            } else {
+                if ((doc.getElementsByTagName("h2").item(0) != null)) {
+                    chapterContent.add(doc.getElementsByTagName("h2").item(0).getTextContent());
+                    if ((doc.getElementsByTagName("b").item(0) != null)) {
+                        chapterContent.add(doc.getElementsByTagName("b").item(0).getTextContent());
+                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
+                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
+                        }
+                    }
+                    else {
+                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
+                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
+                        }
+                        else {
+                            chapterContent.add("null");
+                        }
+                    }
+                }
+                else {
+                    if ((doc.getElementsByTagName("b").item(0) != null)) {
+                        chapterContent.add(doc.getElementsByTagName("b").item(0).getTextContent());
+                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
+                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
+                        }
+                    }
+                    else {
+                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
+                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
+                        }
+                        else {
+                            chapterContent.add("null");
+                        }
+                    }
+                }
+            }
+
+            NodeList paraList = doc.getElementsByTagName("p");
+            if(chapterContent.get(0) == "null") {
+                if(paraList.item(0) == null) {
+                    return null;
+                }
+                else {
+                    chapterContent.remove(0);
+                }
+            }
+
+            for(int i = 0; i < paraList.getLength(); i++) {
+                chapterContent.add(paraList.item(i).getTextContent());
+            }
+            return chapterContent;
 
         } catch (SAXException e) {
             e.printStackTrace();
