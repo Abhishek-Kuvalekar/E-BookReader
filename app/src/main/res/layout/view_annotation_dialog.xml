@@ -4,21 +4,40 @@
     android:layout_width="250dp"
     android:layout_height="250dp"
     android:layout_gravity="center">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Annotations"
-        android:textStyle="bold"
-        android:textSize="16dp"
-        android:gravity="center"></TextView>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="210dp"
-        android:id="@+id/textView_view_annotaion_dialog"
-        android:background="@drawable/edit_text_background"
-        android:layout_margin="5dp"></TextView>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"></LinearLayout>
+        android:layout_height="210dp"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Annotations"
+            android:textStyle="bold"
+            android:textSize="16dp"
+            android:gravity="center"></TextView>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/textView_view_annotaion_dialog"
+            android:background="@drawable/edit_text_background"
+            android:layout_margin="5dp"
+            android:textSize="16dp"></TextView>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="right"
+        android:layout_margin="5dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="right"
+            android:text="OK"
+            android:textSize="16dp"
+            android:textStyle="bold"
+            android:id="@+id/ok_button_view_annotation_dialog"
+            android:layout_marginRight="10dp"
+            android:clickable="true"/>
+    </LinearLayout>
 
 </LinearLayout>

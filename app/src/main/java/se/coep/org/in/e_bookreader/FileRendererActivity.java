@@ -186,6 +186,27 @@ public class FileRendererActivity extends AppCompatActivity {
                         }
                     });
 
+                    TextView viewAnnotations = (TextView) optionsDialog.findViewById(R.id.view_annotations_options_dialog);
+                    viewAnnotations.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            final Dialog showAnnotationsDialog = new Dialog(FileRendererActivity.this);
+                            showAnnotationsDialog.setContentView(R.layout.view_annotation_dialog);
+                            showAnnotationsDialog.show();
+
+                            TextView note = (TextView) showAnnotationsDialog.findViewById(R.id.textView_view_annotaion_dialog);
+                            note.setText(file.getAnnotationForCurrentChapter());
+
+                            TextView ok = (TextView) showAnnotationsDialog.findViewById(R.id.ok_button_view_annotation_dialog);
+                            ok.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    showAnnotationsDialog.hide();
+                                }
+                            });
+                        }
+                    });
+
                     TextView bookmark = (TextView) optionsDialog.findViewById(R.id.bookmark_options_dialog);
                     bookmark.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -276,7 +297,7 @@ public class FileRendererActivity extends AppCompatActivity {
                                 String data = pasteData.substring(1, pasteData.length()-1);
                                 file.highlightDocument(data);
                                 Log.v("select", data);
-                                /*webview.findAllAsync(data);
+                                webview.findAllAsync(data);
                                 Method m = null;
                                 try {
                                     m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
@@ -287,7 +308,7 @@ public class FileRendererActivity extends AppCompatActivity {
                                     e.printStackTrace();
                                 } catch (InvocationTargetException e) {
                                     e.printStackTrace();
-                                }*/
+                                }
                             }
                         }
                 );
@@ -295,6 +316,55 @@ public class FileRendererActivity extends AppCompatActivity {
                 return true;
             }
         });
+        //new ToastMenuItemListener(this, mode, "Text Highlighted!", this.getWindow().getDecorView()));
+    }
 
+    private  class ToastMenuItemListener implements MenuItem.OnMenuItemClickListener {
+
+        private final Context context;
+        private final ActionMode actionMode;
+        private final String text;
+        private View view;
+
+        private ToastMenuItemListener(Context context, ActionMode actionMode, String text, View view) {
+            this.context = context;
+            this.actionMode = actionMode;
+            this.text = text;
+            this.view = view;
+        }
+
+        @TargetApi(Build.VERSION_CODES.KITKAT)
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+            final WebView webview = (WebView) view.findViewById(R.id.webview);
+            webview.getSettings().setJavaScriptEnabled(true);
+            webview.evaluateJavascript("(function() {return window.getSelection().toString()})()",
+                    new ValueCallback<String>() {
+                        @Override
+                        public void onReceiveValue(String s) {
+                            Log.v("select", s);
+                        }
+                    }
+            );
+            Menu menu = actionMode.getMenu();
+            menu.findItem(0).setChecked(true);
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            String pasteData = "";
+            ClipData.Item textItem = clipboard.getPrimaryClip().getItemAt(0);
+            pasteData = textItem.getText().toString();
+            Log.v("text", pasteData);
+            menu.findItem(0).setChecked(false);
+            webview.findAllAsync(pasteData);
+            try
+            {
+                Method m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
+                m.invoke(webview, true);
+            }
+            catch (Throwable ignored){}
+            actionMode.finish();
+            return true;
+        }
     }
 }
