@@ -43,12 +43,14 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/ic_minus"
                     android:id="@+id/minus_button_options_dialog"
-                    android:layout_marginRight="20dp"/>
+                    android:layout_marginRight="20dp"
+                    android:clickable="true"/>
                 <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/ic_plus"
-                    android:id="@+id/plus_button_options_dialog"/>
+                    android:id="@+id/plus_button_options_dialog"
+                    android:clickable="true"/>
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
@@ -60,7 +62,8 @@
                 android:layout_width="230dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/font_family_spinner_options_dialog"
-                android:entries="@array/fonts">
+                android:entries="@array/fonts"
+                android:clickable="true">
             </Spinner>
         </LinearLayout>
     </LinearLayout>
@@ -127,7 +130,18 @@
             android:text="Annotate"
             android:textSize="16dp"
             android:textColor="#000"
-            android:id="@+id/annotate_options_dialog"></TextView>
+            android:id="@+id/annotate_options_dialog"
+            android:clickable="true"></TextView>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="View Annotations"
+            android:textSize="16dp"
+            android:textColor="#000"
+            android:layout_marginTop="10dp"
+            android:id="@+id/view_annotations_options_dialog"
+            android:clickable="true"></TextView>
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
@@ -136,7 +150,42 @@
             android:textSize="16dp"
             android:textColor="#000"
             android:layout_marginTop="10dp"
+            android:clickable="true"
             android:id="@+id/bookmark_options_dialog"></TextView>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="Search"
+            android:textSize="16dp"
+            android:textColor="#000"
+            android:layout_marginTop="10dp"
+            android:id="@+id/search_options_dialog"></TextView>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider3"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="Text To Speech"
+            android:textSize="16dp"
+            android:textColor="#000"
+            android:id="@+id/text_to_speech_options_dialog"
+            android:clickable="true"></TextView>
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
@@ -146,6 +195,7 @@
             android:textColor="#000"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
-            android:id="@+id/exit_options_dialog"></TextView>
+            android:id="@+id/exit_options_dialog"
+            android:clickable="true"></TextView>
     </LinearLayout>
 </LinearLayout>
