@@ -881,81 +881,25 @@ public class EpubFile {
             Document doc = dBuilder.parse(file);
             doc.getDocumentElement().normalize();
 
-            if ((doc.getElementsByTagName("h1").item(0) != null)) {
-                chapterContent.add(doc.getElementsByTagName("h1").item(0).getTextContent());
-                if ((doc.getElementsByTagName("h2").item(0) != null)) {
-                    chapterContent.add(doc.getElementsByTagName("h2").item(0).getTextContent());
-                    if ((doc.getElementsByTagName("b").item(0) != null)) {
-                        chapterContent.add(doc.getElementsByTagName("b").item(0).getTextContent());
-                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
-                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
-                        }
-                    }
-                    else {
-                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
-                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
-                        }
-                    }
-                }
-                else {
-                    if ((doc.getElementsByTagName("b").item(0) != null)) {
-                        chapterContent.add(doc.getElementsByTagName("b").item(0).getTextContent());
-                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
-                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
-                        }
-                    }
-                    else {
-                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
-                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
-                        }
-                    }
-                }
-            } else {
-                if ((doc.getElementsByTagName("h2").item(0) != null)) {
-                    chapterContent.add(doc.getElementsByTagName("h2").item(0).getTextContent());
-                    if ((doc.getElementsByTagName("b").item(0) != null)) {
-                        chapterContent.add(doc.getElementsByTagName("b").item(0).getTextContent());
-                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
-                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
-                        }
-                    }
-                    else {
-                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
-                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
-                        }
-                        else {
-                            chapterContent.add("null");
-                        }
-                    }
-                }
-                else {
-                    if ((doc.getElementsByTagName("b").item(0) != null)) {
-                        chapterContent.add(doc.getElementsByTagName("b").item(0).getTextContent());
-                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
-                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
-                        }
-                    }
-                    else {
-                        if ((doc.getElementsByTagName("strong").item(0) != null)) {
-                            chapterContent.add(doc.getElementsByTagName("strong").item(0).getTextContent());
-                        }
-                        else {
-                            chapterContent.add("null");
-                        }
-                    }
-                }
-            }
-
             NodeList paraList = doc.getElementsByTagName("p");
-            if(chapterContent.get(0) == "null") {
-                if(paraList.item(0) == null) {
+            if(paraList.item(0) == null) {
+                Node node = doc.getElementsByTagName("body").item(0);
+                if(node == null) {
                     return null;
                 }
                 else {
-                    chapterContent.remove(0);
+                    chapterContent.add(node.getTextContent());
                 }
             }
-
+            else {
+                Node node = doc.getElementsByTagName("h2").item(0);
+                if(node == null) {
+                    chapterContent.add(doc.getElementsByTagName("body").item(0).getTextContent());
+                }
+                else {
+                    chapterContent.add(node.getTextContent());
+                }
+            }
             for(int i = 0; i < paraList.getLength(); i++) {
                 chapterContent.add(paraList.item(i).getTextContent());
             }
