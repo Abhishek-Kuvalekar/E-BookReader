@@ -45,6 +45,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -83,6 +84,7 @@ public class EpubFile {
     private int fontFamilyPosition;
     private boolean isNightModeOn;
     private double brightness;
+    private String stringToBeSearched = null;
 
     public EpubFile(String fileName, Context context, View view) {
         this.context = context;
@@ -285,6 +287,9 @@ public class EpubFile {
                     currentChapter++;
                     Log.d("tag2", getCurrentChapterPath());
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+                    if(stringToBeSearched != null) {
+                        focusSearchedString();
+                    }
                 }
                 else {
                     Toast.makeText(context, "End of the book", Toast.LENGTH_SHORT).show();
@@ -294,6 +299,9 @@ public class EpubFile {
                 if(currentChapter != 0) {
                     currentChapter--;
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+                    if(stringToBeSearched != null) {
+                        focusSearchedString();
+                    }
                 }
                 else if(currentChapter == 0) {
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
@@ -812,6 +820,17 @@ public class EpubFile {
     }
 
     public void searchPatternInDoc(String searchString) {
+        stringToBeSearched = searchString;
+        focusSearchedString();
+    }
 
+    public void focusSearchedString() {
+        WebView mWebView = (WebView) view.findViewById(R.id.webview);
+        mWebView.findAllAsync(stringToBeSearched.toString());
+
+        try{
+            Method m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
+            m.invoke(mWebView, true);
+        }catch(Exception ignored){}
     }
 }

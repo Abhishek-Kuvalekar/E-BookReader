@@ -210,6 +210,7 @@ public class FileRendererActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(View v) {
                                     searchDialog.hide();
+
                                 }
                             });
 
@@ -217,9 +218,10 @@ public class FileRendererActivity extends AppCompatActivity {
                             save.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    EditText text = (EditText) searchDialog.findViewById(R.id.annotation_editext_annotate_dialog);
+                                    EditText text = (EditText) searchDialog.findViewById(R.id.search_editext_dialog);
                                     String note = String.valueOf(text.getText());
                                     searchDialog.hide();
+                                    optionsDialog.hide();
                                     file.searchPatternInDoc(note);
                                 }
                             });
