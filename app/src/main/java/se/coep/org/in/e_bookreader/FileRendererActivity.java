@@ -377,10 +377,4 @@ public class FileRendererActivity extends AppCompatActivity {
         file.stopTTS();
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        file.save();
-    }
-
 }
