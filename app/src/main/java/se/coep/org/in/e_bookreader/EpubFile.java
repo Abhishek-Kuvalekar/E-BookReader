@@ -125,14 +125,13 @@ public class EpubFile {
 
         try{
 
-            FileOutputStream fos = new FileOutputStream(fileName + "he");
+            FileOutputStream fos = new FileOutputStream(fileName);
             ZipOutputStream zos = new ZipOutputStream(fos);
 
             System.out.println("Output to Zip : " + fileName);
 
             for(String file : fileList){
 
-                System.out.println("File Added : " + file);
                 ZipEntry ze= new ZipEntry(file);
                 zos.putNextEntry(ze);
 
@@ -151,7 +150,6 @@ public class EpubFile {
             //remember close it
             zos.close();
 
-            //System.out.println("Done");
         }catch(IOException ex){
             ex.printStackTrace();
         }
@@ -300,11 +298,7 @@ public class EpubFile {
     }
 
     public String getNcxFilePath() {
-        //unzip();
         unzippedDir = getUnzippedDirectory();
-        List<String> parsedContentList = parse(unzippedDir + "/" +
-                getContentDir(new File(unzippedDir).list()) + "/" +
-                getContentFile());
         String ncxFilePath = unzippedDir + "/" +
                 getContentDir(new File(unzippedDir).list()) + "/" +
                 getContentFile();
@@ -787,18 +781,23 @@ public class EpubFile {
             NodeList nList = doc.getElementsByTagName("Chapter");
 
             for(int i = 0; i < contentList.size(); i++) {
-                Node nNode = nList.item(i);
-                if(nNode == null) {
-                    Toast.makeText(context, "nNode Null", Toast.LENGTH_SHORT).show();
-                    return null;
+                Node nNode = null;
+                if(i < nList.getLength()) {
+                    nNode = nList.item(i);
                 }
-                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element eElement = (Element) nNode;
-                    int pos = Integer.parseInt(eElement.getAttribute("id"));
-                    if(pos == i) {
-                        array[i] = pos;
-                    }else {
-                        array[i] = -1;
+                if(nNode == null) {
+                    Log.v("Bookmarks", "nNode Null " + i);
+                    array[i] = -1;
+                }
+                else {
+                    if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                        Element eElement = (Element) nNode;
+                        int pos = Integer.parseInt(eElement.getAttribute("id"));
+                        if (pos == i) {
+                            array[i] = pos;
+                        } else {
+                            array[i] = -1;
+                        }
                     }
                 }
             }
