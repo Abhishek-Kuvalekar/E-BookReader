@@ -39,9 +39,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -734,22 +738,6 @@ public class EpubFile {
         }
         return array;
     }
-    public void highlightDocument(String data) {
-        int id = currentChapter;
-        String chapterName = contents.get(id);
-        Log.v("highlight", data);
-        //String n = parseCurrentChapter(chapterName, data);
-        //List<String> listOfStrings = parseCurrentChapter();
-        //List<String> listOfParas = parseCurrentChapter();
-        //String notification = addHighlightToChapterFile(listOfParas, data);
-
-       /* if(notification == "highlighted") {
-             open(context, view, true);
-        }else {
-            Toast.makeText(context, "Cannot highlight text.", Toast.LENGTH_SHORT).show();
-        }
-        Log.v("highlight", notification);*/
-    }
 
     public String parseCurrentChapter(String chapterName, String highlighted) {
         String chapterPath = getUnzippedDirectory() + "/" + getContentDir(new File(getUnzippedDirectory()).list()) + "/" + chapterName;
@@ -1064,4 +1052,65 @@ public class EpubFile {
         ArrayList<String> list = new ArrayList<String>();
         return null;
     }
+
+    public List<String> parseCurrentChap() {
+        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list2 = new ArrayList<String>();
+        Scanner scanner = null;
+        try {
+            scanner = new Scanner(new File(getCurrentChapterPath())).useDelimiter(">\n");
+            while (scanner.hasNext()) {
+                list.add(scanner.next());
+            }
+            Log.v("size", String.valueOf(list.size()));
+            for(int i = 0; i<list.size(); i++) {
+                list2.add(list.get(i).concat(">"));
+                Log.v("list", list2.get(i));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return list2;
+    }
+
+    public List<String> addHighlightContent(List<String> list, String data) {
+        ArrayList<String> list2 = new ArrayList<String>();
+        for(int i = 0; i<list.size(); i++) {
+            //if(list.get(i).contains(data)) {
+                Log.v("data", data);
+                //String temp = list.get(i).replaceAll(data, "<span class=\"highlighted\">"+data+"</span>");
+                //list2.add(temp);
+                int index = list.get(i).indexOf(data);
+                if(index != -1) {
+                    String preString = list.get(i).substring(0, index-1);
+                    String subString = list.get(i).substring(index + data.length(), list.get(i).length());
+                    list2.add(preString.concat("<span class=\"highlighted\">"+data+"</span>").concat(subString));
+                }else {
+                    list2.add(list.get(i));
+                }
+                Log.v("changed", list2.get(i));
+           // }
+        }
+        return list2;
+    }
+
+    public void highlightDocument(String data) {
+        int id = currentChapter;
+        String chapterName = contents.get(id);
+        Log.v("highlight", data);
+        //String n = parseCurrentChapter(chapterName, data);
+        List<String> listOfStrings = parseCurrentChap();
+        List<String> changedStrings = addHighlightContent(listOfStrings, data);
+        //List<String> listOfParas = parseCurrentChapter();
+        //String notification = addHighlightToChapterFile(listOfParas, data);
+
+       /* if(notification == "highlighted") {
+             open(context, view, true);
+        }else {
+            Toast.makeText(context, "Cannot highlight text.", Toast.LENGTH_SHORT).show();
+        }
+        Log.v("highlight", notification);*/
+    }
+
 }
