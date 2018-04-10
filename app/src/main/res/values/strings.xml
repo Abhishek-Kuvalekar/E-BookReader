@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">E-Book Reader</string>
     <string-array name="fonts">
-        <item>Arial</item>
-        <item>Times New Roman</item>
-        <item>Monospace</item>
+        <item>Default</item>
+        <item>Ahellya</item>
+        <item>Immortal</item>
+        <item>Impress BT</item>
+        <item>Lato-Heavy</item>
+        <item>Outer Space</item>
     </string-array>
 </resources>

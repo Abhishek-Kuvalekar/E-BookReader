@@ -466,7 +466,13 @@ public class EpubFile {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void changeFontStyle(String fontStyle) {
+        if(fontStyle.equals("Default") == true) {
+            return;
+        }
         String CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
+                "@font-face {" +
+                "font-family: " + fontStyle + ";" +
+                "src: url(\"file:///android_asset/fonts/" + fontStyle + ".ttf\");}" +
                 "body {" +
                 "font-family:\"" + fontStyle + "\";}" +
                 "</style>";
@@ -490,7 +496,7 @@ public class EpubFile {
     public void switchNightMode(boolean nightMode) {
         String CSS;
         if(nightMode == true) {
-            webView.setBackgroundColor(Color.BLACK);
+            webView.setBackgroundColor(Color.parseColor("#212121"));
             CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
                     "body{" +
                     "color: #FFF;}" +
@@ -498,13 +504,13 @@ public class EpubFile {
                     "color: #FFF;}" +
                     ".chapterHeader {" +
                     "color: #FFF;" +
-                    "background-color: #000;}" +
+                    "background-color: #212121;}" +
                     ".chapterHeader .translation{" +
                     "color: #FFF;" +
-                    "background-color: #000;}" +
+                    "background-color: #212121;}" +
                     ".chapterHeader .count{" +
                     "color: #FFF;" +
-                    "background-color: #000;}" +
+                    "background-color: #212121;}" +
                     "</style>";
             this.isNightModeOn = true;
         }
