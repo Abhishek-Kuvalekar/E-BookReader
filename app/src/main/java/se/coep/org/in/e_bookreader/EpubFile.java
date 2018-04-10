@@ -33,7 +33,9 @@ import org.xml.sax.SAXException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
@@ -43,6 +45,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -75,6 +79,7 @@ public class EpubFile {
     private double brightness;
     private String stringToBeSearched = null;
     private TextToSpeech tts;
+    private List<String> fileList;
 
     public EpubFile(String fileName, Context context, View view) {
         this.context = context;
@@ -86,6 +91,7 @@ public class EpubFile {
         this.isNightModeOn = false;
         this.brightness = 0.5;
         this.tts = null;
+        this.fileList = new ArrayList<String>();
     }
 
     public void setFontFamilyPosition(int fontFamilyPosition) {
@@ -103,6 +109,69 @@ public class EpubFile {
         Log.d(TAG, String.valueOf(unzipLocation.toString()));
         Decompress d = new Decompress(zipFile, unzipLocation.toString() + "/unzipped/");
         d.unzip();
+    }
+
+    public void save() {
+        generateFileList(new File(getUnzippedDirectory()));
+        zip();
+    }
+
+    public void zip() {
+        byte[] buffer = new byte[1024];
+
+        try{
+
+            FileOutputStream fos = new FileOutputStream(fileName + "he");
+            ZipOutputStream zos = new ZipOutputStream(fos);
+
+            System.out.println("Output to Zip : " + fileName);
+
+            for(String file : fileList){
+
+                System.out.println("File Added : " + file);
+                ZipEntry ze= new ZipEntry(file);
+                zos.putNextEntry(ze);
+
+                FileInputStream in =
+                        new FileInputStream(getUnzippedDirectory() + File.separator + file);
+
+                int len;
+                while ((len = in.read(buffer)) > 0) {
+                    zos.write(buffer, 0, len);
+                }
+
+                in.close();
+            }
+
+            zos.closeEntry();
+            //remember close it
+            zos.close();
+
+            //System.out.println("Done");
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
+
+
+    public void generateFileList(File node){
+
+        //add file only
+        if(node.isFile()){
+            fileList.add(generateZipEntry(node.getAbsoluteFile().toString()));
+        }
+
+        if(node.isDirectory()){
+            String[] subNote = node.list();
+            for(String filename : subNote){
+                generateFileList(new File(node, filename));
+            }
+        }
+    }
+
+    private String generateZipEntry(String file){
+        return file.substring(getUnzippedDirectory().length()+1, file.length());
     }
 
     public String getUnzippedDirectory() {
@@ -702,6 +771,10 @@ public class EpubFile {
 
             for(int i = 0; i < contentList.size(); i++) {
                 Node nNode = nList.item(i);
+                if(nNode == null) {
+                    Toast.makeText(context, "nNode Null", Toast.LENGTH_SHORT).show();
+                    return null;
+                }
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) nNode;
                     int pos = Integer.parseInt(eElement.getAttribute("id"));
