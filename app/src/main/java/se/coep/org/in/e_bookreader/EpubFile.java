@@ -739,58 +739,6 @@ public class EpubFile {
         return array;
     }
 
-    public String parseCurrentChapter(String chapterName, String highlighted) {
-        String chapterPath = getUnzippedDirectory() + "/" + getContentDir(new File(getUnzippedDirectory()).list()) + "/" + chapterName;
-        BufferedReader reader = null;
-        PrintWriter out = null;
-        try {
-            reader = new BufferedReader(new FileReader(chapterPath));
-            String line = null;
-            StringBuilder stringBuilder = new StringBuilder();
-            String ls = System.getProperty("line.separator");
-
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append(ls);
-            }
-            Log.v("stringbuilder", stringBuilder.substring(0, stringBuilder.length()));
-            String content = stringBuilder.toString();
-            String finalcontent = content;
-            Log.v("high", highlighted);
-            String[] firstSecondhalf = content.split(highlighted);
-            //finalcontent = firstSecondhalf[0] + "<span class=\"highlighted\">" + highlighted + "</span>" + firstSecondhalf[1];
-            Log.v("firsthalf", firstSecondhalf[0]);
-            Log.v("secondhalf", firstSecondhalf[1]);
-            String finalFinalcontent;
-            if(finalcontent.contains("<style>")) {
-                String[] twohalves = finalcontent.split("</style>", 2);
-                finalFinalcontent = twohalves[0]+".highlighted {background-color:yellow;}"+"\n</style>\n"+twohalves[1];
-            }else {
-                String[] twohalves = finalcontent.split("</head>", 2);
-                finalFinalcontent = twohalves[0]+"\n<style>\n.highlighted {background-color:yellow;}\n</style>\n</head>\n"+twohalves[1];
-            }
-            Log.v("highlighted", finalFinalcontent);
-            out = new PrintWriter(new BufferedWriter(new FileWriter(chapterPath)));
-            out.print(finalFinalcontent);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (out != null) {
-                out.close();
-            }
-        }
-        return "highlighted";
-    }
-
     public void addHighlightToCSS() {
         String CSSDir = getCSSDirectory();
         File file = new File(CSSDir);
@@ -806,7 +754,7 @@ public class EpubFile {
                     try {
                         bw = new BufferedWriter(new FileWriter(CSSDir+"/"+css, true));
                         bw.newLine();
-                        bw.write(".highlighted {background-color: yellow;}");
+                        bw.write(".highlighted {background-color: #ccff90;}");
                         bw.newLine();
                         bw.flush();
                     } catch (IOException ioe) {
@@ -927,132 +875,6 @@ public class EpubFile {
         return null;
     }
 
-    /*public List<String> parseCurrentChapter() {
-        if(currentChapter == -1) {
-            return null;
-        }
-        List<String> chapterContent = new ArrayList<String>();
-        try {
-            File file = new File(getCurrentChapterPath());
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(file);
-            doc.getDocumentElement().normalize();
-
-            NodeList paraList = doc.getElementsByTagName("p");
-            if(paraList.item(0) == null) {
-                Node node = doc.getElementsByTagName("body").item(0);
-                if(node == null) {
-                    return null;
-                }
-                else {
-                    chapterContent.add(node.getTextContent());
-                }
-            }
-            else {
-                Node node = doc.getElementsByTagName("h2").item(0);
-                if(node == null) {
-                    chapterContent.add(doc.getElementsByTagName("body").item(0).getTextContent());
-                }
-                else {
-                    chapterContent.add(node.getTextContent());
-                }
-            }
-            for(int i = 0; i < paraList.getLength(); i++) {
-                chapterContent.add(paraList.item(i).getTextContent());
-            }
-            return chapterContent;
-
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public String addHighlightToChapterFile(List<String> listOFParas, String toBeHighlighted) {
-
-        Log.d("here", "here");
-        for(int i=0; i<listOFParas.size(); i++) {
-            Log.d("list", listOFParas.get(i));
-            if(listOFParas.get(i).contains(toBeHighlighted)) {
-               String temp = listOFParas.get(i).replaceAll(toBeHighlighted, "<span class=\"highlighted\">"+toBeHighlighted+"</span>");
-               listOFParas.remove(i);
-               listOFParas.add(i, temp);
-               Log.d("listtemp", listOFParas.get(i));
-            }
-        }
-
-        try {
-            File file = new File(getCurrentChapterPath());
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(file);
-            doc.getDocumentElement().normalize();
-
-            Node stylenode = doc.getElementsByTagName("style").item(0);
-            if (stylenode == null) {
-                Node headnode = doc.getElementsByTagName("head").item(0);
-                Element element = (Element) doc.createElement("style");
-                headnode.appendChild(element);
-                element.setTextContent(".highlight {background-color:yellow;}");
-            }else {
-                String content = stylenode.getTextContent();
-                stylenode.setTextContent(content+"\n"+".highlight {background-color:yellow;}");
-            }
-
-            NodeList paraList = doc.getElementsByTagName("p");
-            if(paraList.item(0) == null) {
-                Node node = doc.getElementsByTagName("body").item(0);
-                if(node == null) {
-                    return null;
-                }
-                else {
-                    node.setTextContent(listOFParas.get(0));
-                }
-            }
-            else {
-                Node node = doc.getElementsByTagName("h2").item(0);
-                if(node == null) {
-                    //chapterContent.add(doc.getElementsByTagName("body").item(0).getTextContent());
-                    doc.getElementsByTagName("body").item(0).setTextContent(listOFParas.get(0));
-                }
-                else {
-                    node.setTextContent(listOFParas.get(0));
-                }
-            }
-            for(int i = 0; i < paraList.getLength(); i++) {
-                paraList.item(i).setTextContent(listOFParas.get(i+1));
-            }
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(file);
-            transformer.transform(source, result);
-            return "highlighted";
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
-        return null;
-
-    }*/
-
-    public List<String> parseCurrentChapter() {
-        ArrayList<String> list = new ArrayList<String>();
-        return null;
-    }
-
     public List<String> parseCurrentChap() {
         ArrayList<String> list = new ArrayList<String>();
         ArrayList<String> list2 = new ArrayList<String>();
@@ -1062,32 +884,34 @@ public class EpubFile {
             while (scanner.hasNext()) {
                 list.add(scanner.next());
             }
+            int i;
             Log.v("size", String.valueOf(list.size()));
-            for(int i = 0; i<list.size(); i++) {
+            for(i = 0; i<list.size(); i++) {
                 list2.add(list.get(i).concat(">"));
                 Log.v("list", list2.get(i));
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        }finally {
+            if(scanner != null) {
+                scanner.close();
+            }
         }
 
         return list2;
     }
 
     public List<String> addHighlightContent(List<String> list, String data) {
-        ArrayList<String> list2 = new ArrayList<String>();
-        String[] dataSplit = data.split(" ");
+        String[] dataSplit = data.split(" |\\.|,|;|:|\\\n|<|>");
         //Log.v("replace", dataWithoutSpaces);
         for(String str : dataSplit) {
             Log.v("yxz", str);
         }
         for(int i = 0; i<list.size(); i++) {
-            String[] paraSplit = list.get(i).split(" ");
+            String[] paraSplit = list.get(i).split(" |\\.|,|;|:|\\\n|<|>");
             for(String str : paraSplit) {
                 Log.v("XYZ", str);
             }
-            //Log.v("xxxpara", String.valueOf(paraSplit));
-            //Log.v("xxxdata", String.valueOf(dataSplit));
             int j = 0;
             int temp = -1;
             for(int k = 0; k<paraSplit.length; k++) {
@@ -1108,27 +932,41 @@ public class EpubFile {
                 }
             }
             if(temp != -1) {
-                Log.v("xxx", "present");
-            }else {
-                Log.v("xxx", "absent");
-                //Toast.makeText(context, "Cannot highlight text.", Toast.LENGTH_SHORT).show();
-            }
-            //if(list.get(i).contains(data)) {
-                Log.v("data", data);
-                //String temp = list.get(i).replaceAll(data, "<span class=\"highlighted\">"+data+"</span>");
-                //list2.add(temp);
-                int index = list.get(i).indexOf(data);
-                if(index != -1) {
-                    String preString = list.get(i).substring(0, index-1);
-                    String subString = list.get(i).substring(index + data.length(), list.get(i).length());
-                    list2.add(preString.concat("<span class=\"highlighted\">"+data+"</span>").concat(subString));
-                }else {
-                    list2.add(list.get(i));
+                int indexFirst = temp;
+                for(int l = 0; l<temp; l++) {
+                    indexFirst += paraSplit[l].length();
                 }
-                Log.v("changed", list2.get(i));
-           // }
+                int lastIndex = indexFirst+data.length() - 1;
+
+                String tmp = list.remove(i);
+                list.add(i, tmp.substring(0, indexFirst) +
+                        "<span class = \"highlighted\">" +
+                        tmp.substring(indexFirst, lastIndex+1) +
+                        "</span>" + tmp.substring(lastIndex + 1, tmp.length()));
+                Log.v("zzz", list.get(i));
+            }
         }
-        return list2;
+        return list;
+    }
+
+    public void changeEditedChapterFile(List<String> list) {
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(new BufferedWriter(new FileWriter(getCurrentChapterPath())));
+            for(int i = 0; i<list.size(); i++) {
+                out.println(list.get(i));
+                out.flush();
+            }
+
+        }catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if(out != null) {
+                out.close();
+            }
+        }
     }
 
     public void highlightDocument(String data) {
@@ -1138,6 +976,8 @@ public class EpubFile {
         //String n = parseCurrentChapter(chapterName, data);
         List<String> listOfStrings = parseCurrentChap();
         List<String> changedStrings = addHighlightContent(listOfStrings, data);
+        changeEditedChapterFile(changedStrings);
+        webView.reload();
         //List<String> listOfParas = parseCurrentChapter();
         //String notification = addHighlightToChapterFile(listOfParas, data);
 
