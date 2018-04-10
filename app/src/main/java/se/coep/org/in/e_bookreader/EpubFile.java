@@ -41,9 +41,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -77,7 +81,7 @@ public class EpubFile {
     private int fontFamilyPosition;
     private boolean isNightModeOn;
     private double brightness;
-    private String stringToBeSearched = null;
+    public String stringToBeSearched = null;
     private TextToSpeech tts;
     private List<String> fileList;
 
@@ -326,8 +330,11 @@ public class EpubFile {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void open(final Context context, View view, boolean navigationClicked) {
         final WebView webView = (WebView)view.findViewById(R.id.webview);
-        if(getCoverPage() == null && navigationClicked == false) {
+        if(getCoverPage() == null || navigationClicked == false) {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+            if(stringToBeSearched == null) {
+                webView.clearMatches();
+            }
         } else if(navigationClicked == true) {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
         } else {
@@ -349,6 +356,8 @@ public class EpubFile {
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
                     if(stringToBeSearched != null) {
                         focusSearchedString();
+                    }else {
+                        webView.clearMatches();
                     }
                 }
                 else {
@@ -361,6 +370,8 @@ public class EpubFile {
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
                     if(stringToBeSearched != null) {
                         focusSearchedString();
+                    }else {
+                        webView.clearMatches();
                     }
                 }
                 else if(currentChapter == 0) {
@@ -370,6 +381,12 @@ public class EpubFile {
                     Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
                 }
             }
+
+            public void onTap() {
+                stringToBeSearched = null;
+                webView.clearMatches();
+            }
+
             public void onSwipeBottom() {
                 showSystemUI();
             }
@@ -794,69 +811,6 @@ public class EpubFile {
         }
         return array;
     }
-    public void highlightDocument(String data) {
-        int id = currentChapter;
-        String chapterName = contents.get(id);
-        Log.v("highlight", data);
-        String notification = parseCurrentChapter(chapterName, data);
-        if(notification == "highlighted") {
-             open(context, view, true);
-        }
-        Log.v("highlight", notification);
-    }
-
-    public String parseCurrentChapter(String chapterName, String highlighted) {
-        String chapterPath = getUnzippedDirectory() + "/" + getContentDir(new File(getUnzippedDirectory()).list()) + "/" + chapterName;
-        BufferedReader reader = null;
-        PrintWriter out = null;
-        try {
-            reader = new BufferedReader(new FileReader(chapterPath));
-            String line = null;
-            StringBuilder stringBuilder = new StringBuilder();
-            String ls = System.getProperty("line.separator");
-
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append(ls);
-            }
-
-            String content = stringBuilder.toString();
-            String finalcontent = content;
-            String[] firstSecondhalf = content.split(highlighted, 2);
-            if(firstSecondhalf.length == 2) {
-                finalcontent = firstSecondhalf[0] + "<span class=\"highlighted\">" + highlighted + "</span>" + firstSecondhalf[1];
-            }else if(firstSecondhalf.length == 1) {
-                finalcontent = content;
-            }
-            String finalFinalcontent;
-            if(finalcontent.contains("<style>")) {
-                String[] twohalves = finalcontent.split("</style>", 2);
-                finalFinalcontent = twohalves[0]+".highlighted {background-color:yellow;}"+"\n</style>\n"+twohalves[1];
-            }else {
-                String[] twohalves = finalcontent.split("</head>", 2);
-                finalFinalcontent = twohalves[0]+"\n<style>\n.highlighted {background-color:yellow;}\n</style>\n</head>\n"+twohalves[1];
-            }
-            //Log.v("highlighted", finalFinalcontent);
-            out = new PrintWriter(new BufferedWriter(new FileWriter(chapterPath)));
-            out.print(finalFinalcontent);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (out != null) {
-                out.close();
-            }
-        }
-        return "highlighted";
-    }
 
     public void addHighlightToCSS() {
         String CSSDir = getCSSDirectory();
@@ -873,7 +827,7 @@ public class EpubFile {
                     try {
                         bw = new BufferedWriter(new FileWriter(CSSDir+"/"+css, true));
                         bw.newLine();
-                        bw.write(".highlighted {background-color: yellow;}");
+                        bw.write(".highlighted {background-color: #ccff90;}");
                         bw.newLine();
                         bw.flush();
                     } catch (IOException ioe) {
@@ -993,4 +947,119 @@ public class EpubFile {
         }
         return null;
     }
+
+    public List<String> parseCurrentChap() {
+        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list2 = new ArrayList<String>();
+        Scanner scanner = null;
+        try {
+            scanner = new Scanner(new File(getCurrentChapterPath())).useDelimiter(">\n");
+            while (scanner.hasNext()) {
+                list.add(scanner.next());
+            }
+            int i;
+            Log.v("size", String.valueOf(list.size()));
+            for(i = 0; i<list.size(); i++) {
+                list2.add(list.get(i).concat(">"));
+                Log.v("list", list2.get(i));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }finally {
+            if(scanner != null) {
+                scanner.close();
+            }
+        }
+
+        return list2;
+    }
+
+    public List<String> addHighlightContent(List<String> list, String data) {
+        String[] dataSplit = data.split(" |\\.|,|;|:|\\\n|<|>");
+        //Log.v("replace", dataWithoutSpaces);
+        for(String str : dataSplit) {
+            Log.v("yxz", str);
+        }
+        for(int i = 0; i<list.size(); i++) {
+            String[] paraSplit = list.get(i).split(" |\\.|,|;|:|\\\n|<|>");
+            for(String str : paraSplit) {
+                Log.v("XYZ", str);
+            }
+            int j = 0;
+            int temp = -1;
+            for(int k = 0; k<paraSplit.length; k++) {
+                if(paraSplit[k].equals(dataSplit[j])) {
+                    if(j == 0) {
+                        temp = k;
+                    }
+                    j++;
+                    if(j == dataSplit.length) {
+                        break;
+                    }
+                }else if(paraSplit[k].equals(dataSplit[j]) == false) {
+                    j = 0;
+                    if(temp != -1) {
+                        k = temp;
+                    }
+                    temp = -1;
+                }
+            }
+            if(temp != -1) {
+                int indexFirst = temp;
+                for(int l = 0; l<temp; l++) {
+                    indexFirst += paraSplit[l].length();
+                }
+                int lastIndex = indexFirst+data.length() - 1;
+
+                String tmp = list.remove(i);
+                list.add(i, tmp.substring(0, indexFirst) +
+                        "<span class = \"highlighted\">" +
+                        tmp.substring(indexFirst, lastIndex+1) +
+                        "</span>" + tmp.substring(lastIndex + 1, tmp.length()));
+                Log.v("zzz", list.get(i));
+            }
+        }
+        return list;
+    }
+
+    public void changeEditedChapterFile(List<String> list) {
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(new BufferedWriter(new FileWriter(getCurrentChapterPath())));
+            for(int i = 0; i<list.size(); i++) {
+                out.println(list.get(i));
+                out.flush();
+            }
+
+        }catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if(out != null) {
+                out.close();
+            }
+        }
+    }
+
+    public void highlightDocument(String data) {
+        int id = currentChapter;
+        String chapterName = contents.get(id);
+        Log.v("highlight", data);
+        //String n = parseCurrentChapter(chapterName, data);
+        List<String> listOfStrings = parseCurrentChap();
+        List<String> changedStrings = addHighlightContent(listOfStrings, data);
+        changeEditedChapterFile(changedStrings);
+        webView.reload();
+        //List<String> listOfParas = parseCurrentChapter();
+        //String notification = addHighlightToChapterFile(listOfParas, data);
+
+       /* if(notification == "highlighted") {
+             open(context, view, true);
+        }else {
+            Toast.makeText(context, "Cannot highlight text.", Toast.LENGTH_SHORT).show();
+        }
+        Log.v("highlight", notification);*/
+    }
+
 }
