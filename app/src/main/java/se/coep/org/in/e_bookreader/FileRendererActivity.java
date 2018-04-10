@@ -330,6 +330,7 @@ public class FileRendererActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        file.save();
         Intent intent = new Intent(this, FileChooserActivity.class);
         startActivity(intent);
         finish();
