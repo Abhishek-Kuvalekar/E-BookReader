@@ -261,14 +261,18 @@ public class EpubFile {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void open(final Context context, View view, boolean navigationClicked) {
         final WebView webView = (WebView)view.findViewById(R.id.webview);
-        if(getCoverPage() == null || navigationClicked == false) {
+        if(getCoverPage() != null && navigationClicked == false) {
+            currentChapter = -1;
+            webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
+        }else if(getCoverPage() == null || navigationClicked == false) {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
             if(stringToBeSearched == null) {
                 webView.clearMatches();
             }
         } else if(navigationClicked == true) {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
-        } else {
+        }
+        else {
             currentChapter = -1;
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
         }
@@ -306,9 +310,11 @@ public class EpubFile {
                     }
                 }
                 else if(currentChapter == 0) {
+                    currentChapter--;
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
                 }
                 else {
+                    currentChapter = -1;
                     Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
                 }
             }
