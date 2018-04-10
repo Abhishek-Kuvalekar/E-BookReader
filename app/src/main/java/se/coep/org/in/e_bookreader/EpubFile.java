@@ -1076,7 +1076,43 @@ public class EpubFile {
 
     public List<String> addHighlightContent(List<String> list, String data) {
         ArrayList<String> list2 = new ArrayList<String>();
+        String[] dataSplit = data.split(" ");
+        //Log.v("replace", dataWithoutSpaces);
+        for(String str : dataSplit) {
+            Log.v("yxz", str);
+        }
         for(int i = 0; i<list.size(); i++) {
+            String[] paraSplit = list.get(i).split(" ");
+            for(String str : paraSplit) {
+                Log.v("XYZ", str);
+            }
+            //Log.v("xxxpara", String.valueOf(paraSplit));
+            //Log.v("xxxdata", String.valueOf(dataSplit));
+            int j = 0;
+            int temp = -1;
+            for(int k = 0; k<paraSplit.length; k++) {
+                if(paraSplit[k].equals(dataSplit[j])) {
+                    if(j == 0) {
+                        temp = k;
+                    }
+                    j++;
+                    if(j == dataSplit.length) {
+                        break;
+                    }
+                }else if(paraSplit[k].equals(dataSplit[j]) == false) {
+                    j = 0;
+                    if(temp != -1) {
+                        k = temp;
+                    }
+                    temp = -1;
+                }
+            }
+            if(temp != -1) {
+                Log.v("xxx", "present");
+            }else {
+                Log.v("xxx", "absent");
+                //Toast.makeText(context, "Cannot highlight text.", Toast.LENGTH_SHORT).show();
+            }
             //if(list.get(i).contains(data)) {
                 Log.v("data", data);
                 //String temp = list.get(i).replaceAll(data, "<span class=\"highlighted\">"+data+"</span>");
