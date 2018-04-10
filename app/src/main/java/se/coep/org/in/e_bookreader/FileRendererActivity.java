@@ -215,9 +215,8 @@ public class FileRendererActivity extends AppCompatActivity {
                     bookmark.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Log.v("bookmark", "bookmarked");
                             file.addBookmark();
-                            Toast.makeText(FileRendererActivity.this, "Chapter Bookmarked!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(FileRendererActivity.this, "Chapter Bookmarked.View in Navigation.", Toast.LENGTH_SHORT).show();
                             optionsDialog.hide();
                         }
                     });
@@ -353,7 +352,6 @@ public class FileRendererActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                Toast.makeText(FileRendererActivity.this, "Text Highlighted!", Toast.LENGTH_SHORT).show();
                 final WebView webview = (WebView) findViewById(R.id.webview);
                 webview.getSettings().setJavaScriptEnabled(true);
                 webview.evaluateJavascript("(function() {return window.getSelection().toString()})()",
@@ -364,19 +362,6 @@ public class FileRendererActivity extends AppCompatActivity {
                                 pasteData = s;
                                 String data = pasteData.substring(1, pasteData.length()-1);
                                 file.highlightDocument(data);
-                               /* Log.v("select", data);
-                                webview.findAllAsync(data);
-                                Method m = null;
-                                try {
-                                    m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
-                                    m.invoke(webview, true);
-                                } catch (NoSuchMethodException e) {
-                                    e.printStackTrace();
-                                } catch (IllegalAccessException e) {
-                                    e.printStackTrace();
-                                } catch (InvocationTargetException e) {
-                                    e.printStackTrace();
-                                }*/
                             }
                         }
                 );
@@ -390,6 +375,12 @@ public class FileRendererActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         file.stopTTS();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        file.save();
     }
 
 }

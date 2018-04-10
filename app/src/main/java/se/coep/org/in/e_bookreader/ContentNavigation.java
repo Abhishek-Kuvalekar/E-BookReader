@@ -70,14 +70,14 @@ public class ContentNavigation {
         List<String> contentList = file.parseForContent(file.getNcxFilePath());
         int[] bookmarkedChapters = file.getBookmarks(contentList);
         if(bookmarkedChapters == null) {
-            Toast.makeText(context, "No Bookmarks yet!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "No Bookmarks yet!", Toast.LENGTH_SHORT).show();
             for (int i = 0; i < contentList.size(); i++) {
                 MenuItem item = menu.add(1, i, 0, contentList.get(i));
             }
         }else {
             for (int i = 0; i < contentList.size(); i++) {
                 MenuItem item = menu.add(1, i, 0, contentList.get(i));
-                if (bookmarkedChapters[i] != -1) {
+                if (bookmarkedChapters[i] == 1) {
                     item.setIcon(R.drawable.ic_turned_in);
                 }
             }

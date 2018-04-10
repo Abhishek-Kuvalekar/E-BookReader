@@ -84,6 +84,7 @@ public class EpubFile {
     public String stringToBeSearched = null;
     private TextToSpeech tts;
     private List<String> fileList;
+    private boolean flag = false;
 
     public EpubFile(String fileName, Context context, View view) {
         this.context = context;
@@ -784,29 +785,26 @@ public class EpubFile {
             StringBuilder content = new StringBuilder("");
 
             doc.getDocumentElement().normalize();
+
             NodeList nList = doc.getElementsByTagName("Chapter");
 
-            for(int i = 0; i < contentList.size(); i++) {
-                Node nNode = null;
-                if(i < nList.getLength()) {
-                    nNode = nList.item(i);
+            if(nList.getLength() == 0) {
+                return null;
+            }else {
+                for(int i = 0; i<nList.getLength(); i++) {
+                    Node nNode = nList.item(i);
+                    Element eElement = (Element) nNode;
+                    int pos = Integer.parseInt(eElement.getAttribute("id"));
+                    array[pos] = 1;
                 }
-                if(nNode == null) {
-                    Log.v("Bookmarks", "nNode Null " + i);
-                    array[i] = -1;
-                }
-                else {
-                    if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                        Element eElement = (Element) nNode;
-                        int pos = Integer.parseInt(eElement.getAttribute("id"));
-                        if (pos == i) {
-                            array[i] = pos;
-                        } else {
-                            array[i] = -1;
-                        }
+
+                for(int i = 0; i<contentList.size(); i++) {
+                    if(array[i] != 1) {
+                        array[i] = -1;
                     }
                 }
             }
+            return array;
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (SAXException e) {
@@ -814,7 +812,7 @@ public class EpubFile {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return array;
+        return null;
     }
 
     public void addHighlightToCSS() {
@@ -980,16 +978,9 @@ public class EpubFile {
     }
 
     public List<String> addHighlightContent(List<String> list, String data) {
-        String[] dataSplit = data.split(" |\\.|,|;|:|\\\n|<|>");
-        //Log.v("replace", dataWithoutSpaces);
-        for(String str : dataSplit) {
-            Log.v("yxz", str);
-        }
-        for(int i = 0; i<list.size(); i++) {
-            String[] paraSplit = list.get(i).split(" |\\.|,|;|:|\\\n|<|>");
-            for(String str : paraSplit) {
-                Log.v("XYZ", str);
-            }
+        String[] dataSplit = data.split(" |\\.|,|;|:|\\\n|<|>|!|\"|\'");
+        for(int i = 0; i<list.size(); i++){
+            String[] paraSplit = list.get(i).split(" |\\.|,|;|:|\\\n|<|>|!|\"|\'");
             int j = 0;
             int temp = -1;
             for(int k = 0; k<paraSplit.length; k++) {
@@ -1021,7 +1012,9 @@ public class EpubFile {
                         "<span class = \"highlighted\">" +
                         tmp.substring(indexFirst, lastIndex+1) +
                         "</span>" + tmp.substring(lastIndex + 1, tmp.length()));
-                Log.v("zzz", list.get(i));
+                flag = true;
+            }else {
+                flag = false;
             }
         }
         return list;
@@ -1050,21 +1043,15 @@ public class EpubFile {
     public void highlightDocument(String data) {
         int id = currentChapter;
         String chapterName = contents.get(id);
-        Log.v("highlight", data);
-        //String n = parseCurrentChapter(chapterName, data);
         List<String> listOfStrings = parseCurrentChap();
         List<String> changedStrings = addHighlightContent(listOfStrings, data);
         changeEditedChapterFile(changedStrings);
         webView.reload();
-        //List<String> listOfParas = parseCurrentChapter();
-        //String notification = addHighlightToChapterFile(listOfParas, data);
-
-       /* if(notification == "highlighted") {
-             open(context, view, true);
+        if(flag == true) {
+            Toast.makeText(context, "Text highlighted!", Toast.LENGTH_SHORT).show();
         }else {
-            Toast.makeText(context, "Cannot highlight text.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Please do not select partial words for highlighting.", Toast.LENGTH_SHORT).show();
         }
-        Log.v("highlight", notification);*/
     }
 
 }
