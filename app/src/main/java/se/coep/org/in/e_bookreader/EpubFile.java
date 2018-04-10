@@ -73,7 +73,7 @@ public class EpubFile {
     private int fontFamilyPosition;
     private boolean isNightModeOn;
     private double brightness;
-    private String stringToBeSearched = null;
+    public String stringToBeSearched = null;
     private TextToSpeech tts;
 
     public EpubFile(String fileName, Context context, View view) {
@@ -257,8 +257,11 @@ public class EpubFile {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void open(final Context context, View view, boolean navigationClicked) {
         final WebView webView = (WebView)view.findViewById(R.id.webview);
-        if(getCoverPage() == null && navigationClicked == false) {
+        if(getCoverPage() == null || navigationClicked == false) {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+            if(stringToBeSearched == null) {
+                webView.clearMatches();
+            }
         } else if(navigationClicked == true) {
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
         } else {
@@ -280,6 +283,8 @@ public class EpubFile {
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
                     if(stringToBeSearched != null) {
                         focusSearchedString();
+                    }else {
+                        webView.clearMatches();
                     }
                 }
                 else {
@@ -292,6 +297,8 @@ public class EpubFile {
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
                     if(stringToBeSearched != null) {
                         focusSearchedString();
+                    }else {
+                        webView.clearMatches();
                     }
                 }
                 else if(currentChapter == 0) {
@@ -301,6 +308,12 @@ public class EpubFile {
                     Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
                 }
             }
+
+            public void onTap() {
+                stringToBeSearched = null;
+                webView.clearMatches();
+            }
+
             public void onSwipeBottom() {
                 showSystemUI();
             }
@@ -719,11 +732,17 @@ public class EpubFile {
         int id = currentChapter;
         String chapterName = contents.get(id);
         Log.v("highlight", data);
-        String notification = parseCurrentChapter(chapterName, data);
-        if(notification == "highlighted") {
+        //String n = parseCurrentChapter(chapterName, data);
+        //List<String> listOfStrings = parseCurrentChapter();
+        //List<String> listOfParas = parseCurrentChapter();
+        //String notification = addHighlightToChapterFile(listOfParas, data);
+
+       /* if(notification == "highlighted") {
              open(context, view, true);
+        }else {
+            Toast.makeText(context, "Cannot highlight text.", Toast.LENGTH_SHORT).show();
         }
-        Log.v("highlight", notification);
+        Log.v("highlight", notification);*/
     }
 
     public String parseCurrentChapter(String chapterName, String highlighted) {
@@ -740,15 +759,14 @@ public class EpubFile {
                 stringBuilder.append(line);
                 stringBuilder.append(ls);
             }
-
+            Log.v("stringbuilder", stringBuilder.substring(0, stringBuilder.length()));
             String content = stringBuilder.toString();
             String finalcontent = content;
-            String[] firstSecondhalf = content.split(highlighted, 2);
-            if(firstSecondhalf.length == 2) {
-                finalcontent = firstSecondhalf[0] + "<span class=\"highlighted\">" + highlighted + "</span>" + firstSecondhalf[1];
-            }else if(firstSecondhalf.length == 1) {
-                finalcontent = content;
-            }
+            Log.v("high", highlighted);
+            String[] firstSecondhalf = content.split(highlighted);
+            //finalcontent = firstSecondhalf[0] + "<span class=\"highlighted\">" + highlighted + "</span>" + firstSecondhalf[1];
+            Log.v("firsthalf", firstSecondhalf[0]);
+            Log.v("secondhalf", firstSecondhalf[1]);
             String finalFinalcontent;
             if(finalcontent.contains("<style>")) {
                 String[] twohalves = finalcontent.split("</style>", 2);
@@ -757,7 +775,7 @@ public class EpubFile {
                 String[] twohalves = finalcontent.split("</head>", 2);
                 finalFinalcontent = twohalves[0]+"\n<style>\n.highlighted {background-color:yellow;}\n</style>\n</head>\n"+twohalves[1];
             }
-            //Log.v("highlighted", finalFinalcontent);
+            Log.v("highlighted", finalFinalcontent);
             out = new PrintWriter(new BufferedWriter(new FileWriter(chapterPath)));
             out.print(finalFinalcontent);
         } catch (FileNotFoundException e) {
@@ -912,6 +930,132 @@ public class EpubFile {
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    /*public List<String> parseCurrentChapter() {
+        if(currentChapter == -1) {
+            return null;
+        }
+        List<String> chapterContent = new ArrayList<String>();
+        try {
+            File file = new File(getCurrentChapterPath());
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+            doc.getDocumentElement().normalize();
+
+            NodeList paraList = doc.getElementsByTagName("p");
+            if(paraList.item(0) == null) {
+                Node node = doc.getElementsByTagName("body").item(0);
+                if(node == null) {
+                    return null;
+                }
+                else {
+                    chapterContent.add(node.getTextContent());
+                }
+            }
+            else {
+                Node node = doc.getElementsByTagName("h2").item(0);
+                if(node == null) {
+                    chapterContent.add(doc.getElementsByTagName("body").item(0).getTextContent());
+                }
+                else {
+                    chapterContent.add(node.getTextContent());
+                }
+            }
+            for(int i = 0; i < paraList.getLength(); i++) {
+                chapterContent.add(paraList.item(i).getTextContent());
+            }
+            return chapterContent;
+
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String addHighlightToChapterFile(List<String> listOFParas, String toBeHighlighted) {
+
+        Log.d("here", "here");
+        for(int i=0; i<listOFParas.size(); i++) {
+            Log.d("list", listOFParas.get(i));
+            if(listOFParas.get(i).contains(toBeHighlighted)) {
+               String temp = listOFParas.get(i).replaceAll(toBeHighlighted, "<span class=\"highlighted\">"+toBeHighlighted+"</span>");
+               listOFParas.remove(i);
+               listOFParas.add(i, temp);
+               Log.d("listtemp", listOFParas.get(i));
+            }
+        }
+
+        try {
+            File file = new File(getCurrentChapterPath());
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+            doc.getDocumentElement().normalize();
+
+            Node stylenode = doc.getElementsByTagName("style").item(0);
+            if (stylenode == null) {
+                Node headnode = doc.getElementsByTagName("head").item(0);
+                Element element = (Element) doc.createElement("style");
+                headnode.appendChild(element);
+                element.setTextContent(".highlight {background-color:yellow;}");
+            }else {
+                String content = stylenode.getTextContent();
+                stylenode.setTextContent(content+"\n"+".highlight {background-color:yellow;}");
+            }
+
+            NodeList paraList = doc.getElementsByTagName("p");
+            if(paraList.item(0) == null) {
+                Node node = doc.getElementsByTagName("body").item(0);
+                if(node == null) {
+                    return null;
+                }
+                else {
+                    node.setTextContent(listOFParas.get(0));
+                }
+            }
+            else {
+                Node node = doc.getElementsByTagName("h2").item(0);
+                if(node == null) {
+                    //chapterContent.add(doc.getElementsByTagName("body").item(0).getTextContent());
+                    doc.getElementsByTagName("body").item(0).setTextContent(listOFParas.get(0));
+                }
+                else {
+                    node.setTextContent(listOFParas.get(0));
+                }
+            }
+            for(int i = 0; i < paraList.getLength(); i++) {
+                paraList.item(i).setTextContent(listOFParas.get(i+1));
+            }
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(file);
+            transformer.transform(source, result);
+            return "highlighted";
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }*/
+
+    public List<String> parseCurrentChapter() {
+        ArrayList<String> list = new ArrayList<String>();
         return null;
     }
 }

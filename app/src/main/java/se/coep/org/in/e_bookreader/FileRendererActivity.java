@@ -18,15 +18,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -231,7 +235,6 @@ public class FileRendererActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(View v) {
                                     searchDialog.hide();
-
                                 }
                             });
 
@@ -243,7 +246,32 @@ public class FileRendererActivity extends AppCompatActivity {
                                     String note = String.valueOf(text.getText());
                                     searchDialog.hide();
                                     optionsDialog.hide();
+
                                     file.searchPatternInDoc(note);
+
+                                    LinearLayout mainLayout = (LinearLayout)findViewById(R.id.fileShower);
+
+                                    LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                                    View popupView = inflater.inflate(R.layout.popup_window, null);
+
+                                    int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                                    int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                                    //boolean focusable = true; // lets taps outside the popup also dismiss it
+                                    final PopupWindow popupWindow = new PopupWindow(popupView, width, height, false);
+
+                                    // show the popup window
+                                    popupWindow.showAtLocation(mainLayout, Gravity.BOTTOM, 0, 10);
+
+                                    // dismiss the popup window when touched
+                                    popupView.setOnTouchListener(new View.OnTouchListener() {
+                                        @Override
+                                        public boolean onTouch(View v, MotionEvent event) {
+                                            popupWindow.dismiss();
+                                            file.stringToBeSearched = null;
+                                            file.open(FileRendererActivity.this, FileRendererActivity.this.getWindow().getDecorView(), false);
+                                            return true;
+                                        }
+                                    });
                                 }
                             });
 
@@ -335,7 +363,7 @@ public class FileRendererActivity extends AppCompatActivity {
                                 pasteData = s;
                                 String data = pasteData.substring(1, pasteData.length()-1);
                                 file.highlightDocument(data);
-                                Log.v("select", data);
+                               /* Log.v("select", data);
                                 webview.findAllAsync(data);
                                 Method m = null;
                                 try {
@@ -347,7 +375,7 @@ public class FileRendererActivity extends AppCompatActivity {
                                     e.printStackTrace();
                                 } catch (InvocationTargetException e) {
                                     e.printStackTrace();
-                                }
+                                }*/
                             }
                         }
                 );
