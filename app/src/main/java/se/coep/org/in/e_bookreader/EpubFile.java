@@ -325,7 +325,7 @@ public class EpubFile {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void open(final Context context, View view, boolean navigationClicked) {
         final WebView webView = (WebView)view.findViewById(R.id.webview);
-        if(getCoverPage() != null && navigationClicked == false) {
+        /*if(getCoverPage() != null && navigationClicked == false) {
             currentChapter = -1;
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
         }else if(getCoverPage() == null || navigationClicked == false) {
@@ -339,7 +339,25 @@ public class EpubFile {
         else {
             currentChapter = -1;
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
+        }*/
+        if(currentChapter == 0) {
+            if(getCoverPage() == null) {
+                webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+            }else {
+                currentChapter = -1;
+                webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
+            }
+        }else {
+            if(navigationClicked == true) {
+                webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+            }else if(navigationClicked == false) {
+                webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+                if(stringToBeSearched == null) {
+                    webView.clearMatches();
+                }
+            }
         }
+
         WebSettings settings = webView.getSettings();
         settings.setDomStorageEnabled(true);
         settings.setBuiltInZoomControls(true); //sets zooming with pinching

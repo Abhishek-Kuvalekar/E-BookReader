@@ -224,7 +224,7 @@ public class FileRendererActivity extends AppCompatActivity {
                     final TextView search = (TextView) optionsDialog.findViewById(R.id.search_options_dialog);
                     search.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onClick(View view) {
+                        public void onClick(final View view) {
                             final Dialog searchDialog = new Dialog(FileRendererActivity.this);
                             searchDialog.setContentView(R.layout.view_search_dialog);
                             searchDialog.show();
