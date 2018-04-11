@@ -1072,9 +1072,9 @@ public class EpubFile {
         changeEditedChapterFile(changedStrings);
         webView.reload();
         if(flag == true) {
-            Toast.makeText(context, "Text highlighted!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Text highlighted!", Toast.LENGTH_SHORT).show();
         }else {
-            Toast.makeText(context, "Please do not select partial words for highlighting.", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Please do not select partial words for highlighting.", Toast.LENGTH_SHORT).show();
         }
     }
 
