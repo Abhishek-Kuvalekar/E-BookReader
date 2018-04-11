@@ -109,8 +109,8 @@ public class EpubFile {
 
     public void unzip() {
         String zipFile = fileName;
-        //unzipLocation = context.getFilesDir();
-        unzipLocation = Environment.getExternalStorageDirectory();
+        unzipLocation = context.getFilesDir();
+        //unzipLocation = Environment.getExternalStorageDirectory();
         Log.d(TAG, String.valueOf(unzipLocation.toString()));
         Decompress d = new Decompress(zipFile, unzipLocation.toString() + "/unzipped/");
         d.unzip();
@@ -923,6 +923,10 @@ public class EpubFile {
         }
     }
 
+    public boolean isTTSPlaying() {
+        return (tts != null);
+    }
+
     public List<String> getBodyContent() {
         if(currentChapter == -1) {
             return null;
@@ -1032,7 +1036,9 @@ public class EpubFile {
                         "</span>" + tmp.substring(lastIndex + 1, tmp.length()));
                 flag = true;
             }else {
-                flag = false;
+                if(flag != true) {
+                    flag = false;
+                }
             }
         }
         return list;

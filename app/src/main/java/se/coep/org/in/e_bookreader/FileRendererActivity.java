@@ -292,20 +292,26 @@ public class FileRendererActivity extends AppCompatActivity {
                             pitch.setProgress(50);
 
                             final TextView start = (TextView) ttsDialog.findViewById(R.id.start_tts_dialog);
+                            final TextView stop = (TextView) ttsDialog.findViewById(R.id.stop_tts_dialog);
+
                             start.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     start.setEnabled(false);
                                     file.startTTS((float)(speed.getProgress()/50.0), (float)(pitch.getProgress()/50.0));
+                                    stop.setEnabled(true);
                                     speed.setEnabled(false);
                                     pitch.setEnabled(false);
                                 }
                             });
+                            start.setEnabled(!file.isTTSPlaying());
 
-                            TextView stop = (TextView) ttsDialog.findViewById(R.id.stop_tts_dialog);
+
+                            stop.setEnabled(file.isTTSPlaying());
                             stop.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
+                                    stop.setEnabled(false);
                                     file.stopTTS();
                                     start.setEnabled(true);
                                     speed.setEnabled(true);
@@ -376,5 +382,4 @@ public class FileRendererActivity extends AppCompatActivity {
         super.onPause();
         file.stopTTS();
     }
-
 }

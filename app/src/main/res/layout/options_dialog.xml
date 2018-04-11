@@ -181,21 +181,11 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
             android:text="Text To Speech"
             android:textSize="16dp"
             android:textColor="#000"
             android:id="@+id/text_to_speech_options_dialog"
-            android:clickable="true"></TextView>
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_marginLeft="10dp"
-            android:text="Exit"
-            android:textSize="16dp"
-            android:textColor="#000"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:id="@+id/exit_options_dialog"
             android:clickable="true"></TextView>
     </LinearLayout>
 </LinearLayout>
