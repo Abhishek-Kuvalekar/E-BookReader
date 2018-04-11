@@ -76,6 +76,7 @@ public class FileRendererActivity extends AppCompatActivity {
             String ncxFilePath = file.getNcxFilePath();
             file.parse(ncxFilePath);
             file.addHighlightToCSS();
+            file.changeCoverFileName();
             file.open(this, this.getWindow().getDecorView(), false);
             ContentNavigation nav = new ContentNavigation("epub", this, this.getWindow().getDecorView());
             nav.addContent(file.getContentFile(), file);

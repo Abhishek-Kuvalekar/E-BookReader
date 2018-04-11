@@ -15,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -1083,4 +1084,61 @@ public class EpubFile {
         }
     }
 
+    public void changeCoverFileName() {
+        String str = fileName.split("/")[fileName.split("/").length - 1]
+                .split("\\.")[0];
+
+
+
+
+
+
+
+
+
+
+        File f = new File(getUnzippedDirectory() + "/" +
+                getContentDir(new File(getUnzippedDirectory()).list()) +
+                "/images/cover.png");
+        f.renameTo(new File(getUnzippedDirectory() + "/" +
+                getContentDir(new File(getUnzippedDirectory()).list()) +
+                "/images/cover_" + str + ".png"));
+
+        File file = new File(getUnzippedDirectory()+ "/"+
+                getContentDir(new File(getUnzippedDirectory()).list())+"/cover.xml");
+        BufferedReader reader = null;
+        PrintWriter out = null;
+        try {
+            reader = new BufferedReader(new FileReader(file));
+            String line = null;
+            StringBuilder stringBuilder = new StringBuilder();
+            String ls = System.getProperty("line.separator");
+
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(ls);
+            }
+
+            String content = stringBuilder.toString();
+            String finalContent = content.replace("images/cover.png", "images/cover_"+ str +".png");
+            out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            out.print(finalContent);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (out != null) {
+                out.close();
+            }
+        }
+
+    }
 }
