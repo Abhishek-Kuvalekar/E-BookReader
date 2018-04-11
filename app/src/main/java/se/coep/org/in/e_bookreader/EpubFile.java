@@ -129,8 +129,6 @@ public class EpubFile {
             FileOutputStream fos = new FileOutputStream(fileName);
             ZipOutputStream zos = new ZipOutputStream(fos);
 
-            System.out.println("Output to Zip : " + fileName);
-
             for(String file : fileList){
 
                 ZipEntry ze= new ZipEntry(file);
@@ -326,7 +324,7 @@ public class EpubFile {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void open(final Context context, View view, boolean navigationClicked) {
         final WebView webView = (WebView)view.findViewById(R.id.webview);
-        if(getCoverPage() != null && navigationClicked == false) {
+        /*if(getCoverPage() != null && navigationClicked == false) {
             currentChapter = -1;
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
         }else if(getCoverPage() == null || navigationClicked == false) {
@@ -340,9 +338,9 @@ public class EpubFile {
         else {
             currentChapter = -1;
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
-        }
+        }*/
 
-        /*if(currentChapter == 0) {
+        if(currentChapter == 0) {
             if(getCoverPage() == null) {
                 webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
             }else {
@@ -358,7 +356,7 @@ public class EpubFile {
                     webView.clearMatches();
                 }
             }
-        }*/
+        }
 
         WebSettings settings = webView.getSettings();
         settings.setDomStorageEnabled(true);
@@ -559,16 +557,22 @@ public class EpubFile {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void changeFontStyle(String fontStyle) {
+        String CSS;
         if(fontStyle.equals("Default") == true) {
-            webView.getSettings().setSansSerifFontFamily("sans-serif");
+            CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
+                    "body {" +
+                    "font-family: sans-serif;}" +
+                    "</style>";
         }
-        String CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
-                "@font-face {" +
-                "font-family: " + fontStyle + ";" +
-                "src: url(\"file:///android_asset/fonts/" + fontStyle + ".ttf\");}" +
-                "body {" +
-                "font-family:\"" + fontStyle + "\";}" +
-                "</style>";
+        else {
+            CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
+                    "@font-face {" +
+                    "font-family: " + fontStyle + ";" +
+                    "src: url(\"file:///android_asset/fonts/" + fontStyle + ".ttf\");}" +
+                    "body {" +
+                    "font-family:\"" + fontStyle + "\";}" +
+                    "</style>";
+        }
         if(currentChapter != -1) {
             addCSSToXML(CSS, getCurrentChapterPath());
             webView.reload();
@@ -584,7 +588,6 @@ public class EpubFile {
             }
             addCSSToXML(CSS, path);
         }
-        Log.v("FontFamily", webView.getSettings().getFixedFontFamily());
     }
 
     public void switchNightMode(boolean nightMode) {

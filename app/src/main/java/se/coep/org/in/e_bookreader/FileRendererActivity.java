@@ -79,6 +79,7 @@ public class FileRendererActivity extends AppCompatActivity {
             file.open(this, this.getWindow().getDecorView(), false);
             ContentNavigation nav = new ContentNavigation("epub", this, this.getWindow().getDecorView());
             nav.addContent(file.getContentFile(), file);
+            file.changeFontStyle("Default");
         }
     }
 
