@@ -19,12 +19,13 @@ public class Decompress {
         _zipFile = zipFile;
         _location = location;
         File f = new File(_location);
-        if(f.isDirectory()) {
+        if(f.exists()) {
             deleteRecursive(f);
         }
     }
 
     public void deleteRecursive(File fileOrDirectory) {
+        Log.d("FileList", fileOrDirectory.getAbsolutePath());
         if (fileOrDirectory.isDirectory())
             for (File child : fileOrDirectory.listFiles())
                 deleteRecursive(child);

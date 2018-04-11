@@ -335,6 +335,9 @@ public class FileRendererActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if(file.getNightModeState() == true) {
+            file.switchNightMode(false);
+        }
         file.save();
         Intent intent = new Intent(this, FileChooserActivity.class);
         startActivity(intent);

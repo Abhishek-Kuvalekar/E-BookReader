@@ -109,8 +109,8 @@ public class EpubFile {
 
     public void unzip() {
         String zipFile = fileName;
-        unzipLocation = context.getFilesDir();
-        //unzipLocation = Environment.getExternalStorageDirectory();
+        //unzipLocation = context.getFilesDir();
+        unzipLocation = Environment.getExternalStorageDirectory();
         Log.d(TAG, String.valueOf(unzipLocation.toString()));
         Decompress d = new Decompress(zipFile, unzipLocation.toString() + "/unzipped/");
         d.unzip();
@@ -159,6 +159,7 @@ public class EpubFile {
 
 
     public void generateFileList(File node){
+
 
         //add file only
         if(node.isFile()){
@@ -269,14 +270,14 @@ public class EpubFile {
     }
 
     public String getCoverPage() {
-        String coverPagePath = unzippedDir +"/"+ getContentDir(new File(unzippedDir).list());
+        String coverPagePath = getUnzippedDirectory() +"/"+ getContentDir(new File(unzippedDir).list());
         Log.d("tag3", coverPagePath);
         File f = new File(coverPagePath);
         String[] list = f.list();
         for(String coverFile: list) {
             if(coverFile.contains("cover")) {
                 return coverPagePath+"/"+coverFile;
-            } else if(coverFile.contains("title.xhtml")) {
+            } else if(coverFile.contains("title")) {
                 return coverPagePath+"/"+coverFile;
             }
         }
@@ -325,7 +326,7 @@ public class EpubFile {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void open(final Context context, View view, boolean navigationClicked) {
         final WebView webView = (WebView)view.findViewById(R.id.webview);
-        /*if(getCoverPage() != null && navigationClicked == false) {
+        if(getCoverPage() != null && navigationClicked == false) {
             currentChapter = -1;
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
         }else if(getCoverPage() == null || navigationClicked == false) {
@@ -339,8 +340,9 @@ public class EpubFile {
         else {
             currentChapter = -1;
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
-        }*/
-        if(currentChapter == 0) {
+        }
+
+        /*if(currentChapter == 0) {
             if(getCoverPage() == null) {
                 webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
             }else {
@@ -356,7 +358,7 @@ public class EpubFile {
                     webView.clearMatches();
                 }
             }
-        }
+        }*/
 
         WebSettings settings = webView.getSettings();
         settings.setDomStorageEnabled(true);
@@ -382,7 +384,10 @@ public class EpubFile {
                 }
             }
             public void onSwipeRight() {
-                if(currentChapter != 0) {
+                if(currentChapter == -1) {
+                    Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
+                }
+                else if(currentChapter != 0) {
                     currentChapter--;
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
                     if(stringToBeSearched != null) {
@@ -394,10 +399,6 @@ public class EpubFile {
                 else if(currentChapter == 0) {
                     currentChapter--;
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
-                }
-                else {
-                    currentChapter = -1;
-                    Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -559,7 +560,7 @@ public class EpubFile {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void changeFontStyle(String fontStyle) {
         if(fontStyle.equals("Default") == true) {
-            return;
+            webView.getSettings().setSansSerifFontFamily("sans-serif");
         }
         String CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
                 "@font-face {" +
@@ -583,6 +584,7 @@ public class EpubFile {
             }
             addCSSToXML(CSS, path);
         }
+        Log.v("FontFamily", webView.getSettings().getFixedFontFamily());
     }
 
     public void switchNightMode(boolean nightMode) {
