@@ -110,8 +110,8 @@ public class EpubFile {
 
     public void unzip() {
         String zipFile = fileName;
-        //unzipLocation = context.getFilesDir();
-        unzipLocation = Environment.getExternalStorageDirectory();
+        unzipLocation = context.getFilesDir();
+        //unzipLocation = Environment.getExternalStorageDirectory();
         Log.d(TAG, String.valueOf(unzipLocation.toString()));
         Decompress d = new Decompress(zipFile, unzipLocation.toString() + "/unzipped/");
         d.unzip();
