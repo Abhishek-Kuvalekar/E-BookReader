@@ -76,9 +76,11 @@ public class FileRendererActivity extends AppCompatActivity {
             String ncxFilePath = file.getNcxFilePath();
             file.parse(ncxFilePath);
             file.addHighlightToCSS();
+            file.changeCoverFileName();
             file.open(this, this.getWindow().getDecorView(), false);
             ContentNavigation nav = new ContentNavigation("epub", this, this.getWindow().getDecorView());
             nav.addContent(file.getContentFile(), file);
+            file.changeFontStyle("Default");
         }
     }
 
@@ -224,7 +226,7 @@ public class FileRendererActivity extends AppCompatActivity {
                     final TextView search = (TextView) optionsDialog.findViewById(R.id.search_options_dialog);
                     search.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onClick(View view) {
+                        public void onClick(final View view) {
                             final Dialog searchDialog = new Dialog(FileRendererActivity.this);
                             searchDialog.setContentView(R.layout.view_search_dialog);
                             searchDialog.show();
@@ -335,6 +337,9 @@ public class FileRendererActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if(file.getNightModeState() == true) {
+            file.switchNightMode(false);
+        }
         file.save();
         Intent intent = new Intent(this, FileChooserActivity.class);
         startActivity(intent);

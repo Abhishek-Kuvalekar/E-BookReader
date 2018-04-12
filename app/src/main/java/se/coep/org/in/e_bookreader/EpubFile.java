@@ -15,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -109,8 +110,8 @@ public class EpubFile {
 
     public void unzip() {
         String zipFile = fileName;
-        unzipLocation = context.getFilesDir();
-        //unzipLocation = Environment.getExternalStorageDirectory();
+        //unzipLocation = context.getFilesDir();
+        unzipLocation = Environment.getExternalStorageDirectory();
         Log.d(TAG, String.valueOf(unzipLocation.toString()));
         Decompress d = new Decompress(zipFile, unzipLocation.toString() + "/unzipped/");
         d.unzip();
@@ -128,8 +129,6 @@ public class EpubFile {
 
             FileOutputStream fos = new FileOutputStream(fileName);
             ZipOutputStream zos = new ZipOutputStream(fos);
-
-            System.out.println("Output to Zip : " + fileName);
 
             for(String file : fileList){
 
@@ -159,6 +158,7 @@ public class EpubFile {
 
 
     public void generateFileList(File node){
+
 
         //add file only
         if(node.isFile()){
@@ -269,14 +269,14 @@ public class EpubFile {
     }
 
     public String getCoverPage() {
-        String coverPagePath = unzippedDir +"/"+ getContentDir(new File(unzippedDir).list());
+        String coverPagePath = getUnzippedDirectory() +"/"+ getContentDir(new File(unzippedDir).list());
         Log.d("tag3", coverPagePath);
         File f = new File(coverPagePath);
         String[] list = f.list();
         for(String coverFile: list) {
             if(coverFile.contains("cover")) {
                 return coverPagePath+"/"+coverFile;
-            } else if(coverFile.contains("title.xhtml")) {
+            } else if(coverFile.contains("title")) {
                 return coverPagePath+"/"+coverFile;
             }
         }
@@ -325,7 +325,7 @@ public class EpubFile {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void open(final Context context, View view, boolean navigationClicked) {
         final WebView webView = (WebView)view.findViewById(R.id.webview);
-        if(getCoverPage() != null && navigationClicked == false) {
+        /*if(getCoverPage() != null && navigationClicked == false) {
             currentChapter = -1;
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
         }else if(getCoverPage() == null || navigationClicked == false) {
@@ -339,7 +339,26 @@ public class EpubFile {
         else {
             currentChapter = -1;
             webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
+        }*/
+
+        if(currentChapter == 0) {
+            if(getCoverPage() == null) {
+                webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+            }else {
+                currentChapter = -1;
+                webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
+            }
+        }else {
+            if(navigationClicked == true) {
+                webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+            }else if(navigationClicked == false) {
+                webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
+                if(stringToBeSearched == null) {
+                    webView.clearMatches();
+                }
+            }
         }
+
         WebSettings settings = webView.getSettings();
         settings.setDomStorageEnabled(true);
         settings.setBuiltInZoomControls(true); //sets zooming with pinching
@@ -364,7 +383,10 @@ public class EpubFile {
                 }
             }
             public void onSwipeRight() {
-                if(currentChapter != 0) {
+                if(currentChapter == -1) {
+                    Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
+                }
+                else if(currentChapter != 0) {
                     currentChapter--;
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCurrentChapterPath()))));
                     if(stringToBeSearched != null) {
@@ -376,10 +398,6 @@ public class EpubFile {
                 else if(currentChapter == 0) {
                     currentChapter--;
                     webView.loadUrl(String.valueOf(Uri.fromFile(new File(getCoverPage()))));
-                }
-                else {
-                    currentChapter = -1;
-                    Toast.makeText(context, "Start of the book", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -540,16 +558,22 @@ public class EpubFile {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void changeFontStyle(String fontStyle) {
+        String CSS;
         if(fontStyle.equals("Default") == true) {
-            return;
+            CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
+                    "body {" +
+                    "font-family: sans-serif;}" +
+                    "</style>";
         }
-        String CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
-                "@font-face {" +
-                "font-family: " + fontStyle + ";" +
-                "src: url(\"file:///android_asset/fonts/" + fontStyle + ".ttf\");}" +
-                "body {" +
-                "font-family:\"" + fontStyle + "\";}" +
-                "</style>";
+        else {
+            CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
+                    "@font-face {" +
+                    "font-family: " + fontStyle + ";" +
+                    "src: url(\"file:///android_asset/fonts/" + fontStyle + ".ttf\");}" +
+                    "body {" +
+                    "font-family:\"" + fontStyle + "\";}" +
+                    "</style>";
+        }
         if(currentChapter != -1) {
             addCSSToXML(CSS, getCurrentChapterPath());
             webView.reload();
@@ -1054,10 +1078,67 @@ public class EpubFile {
         changeEditedChapterFile(changedStrings);
         webView.reload();
         if(flag == true) {
-            Toast.makeText(context, "Text highlighted!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Text highlighted!", Toast.LENGTH_SHORT).show();
         }else {
-            Toast.makeText(context, "Please do not select partial words for highlighting.", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Please do not select partial words for highlighting.", Toast.LENGTH_SHORT).show();
         }
     }
 
+    public void changeCoverFileName() {
+        String str = fileName.split("/")[fileName.split("/").length - 1]
+                .split("\\.")[0];
+
+
+
+
+
+
+
+
+
+
+        File f = new File(getUnzippedDirectory() + "/" +
+                getContentDir(new File(getUnzippedDirectory()).list()) +
+                "/images/cover.png");
+        f.renameTo(new File(getUnzippedDirectory() + "/" +
+                getContentDir(new File(getUnzippedDirectory()).list()) +
+                "/images/cover_" + str + ".png"));
+
+        File file = new File(getUnzippedDirectory()+ "/"+
+                getContentDir(new File(getUnzippedDirectory()).list())+"/cover.xml");
+        BufferedReader reader = null;
+        PrintWriter out = null;
+        try {
+            reader = new BufferedReader(new FileReader(file));
+            String line = null;
+            StringBuilder stringBuilder = new StringBuilder();
+            String ls = System.getProperty("line.separator");
+
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(ls);
+            }
+
+            String content = stringBuilder.toString();
+            String finalContent = content.replace("images/cover.png", "images/cover_"+ str +".png");
+            out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            out.print(finalContent);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (out != null) {
+                out.close();
+            }
+        }
+
+    }
 }
