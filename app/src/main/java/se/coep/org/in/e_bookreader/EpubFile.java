@@ -594,21 +594,21 @@ public class EpubFile {
     public void switchNightMode(boolean nightMode) {
         String CSS;
         if(nightMode == true) {
-            webView.setBackgroundColor(Color.parseColor("#212121"));
+            webView.setBackgroundColor(Color.parseColor("#424242"));
             CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
                     "body{" +
-                    "color: #FFF;}" +
+                    "color: #e0e0e0;}" +
                     "a {" +
-                    "color: #FFF;}" +
+                    "color: #e0e0e0;}" +
                     ".chapterHeader {" +
-                    "color: #FFF;" +
-                    "background-color: #212121;}" +
+                    "color: #e0e0e0;" +
+                    "background-color: #424242;}" +
                     ".chapterHeader .translation{" +
-                    "color: #FFF;" +
-                    "background-color: #212121;}" +
+                    "color: #e0e0e0;" +
+                    "background-color: #424242;}" +
                     ".chapterHeader .count{" +
-                    "color: #FFF;" +
-                    "background-color: #212121;}" +
+                    "color: #e0e0e0;" +
+                    "background-color: #424242;}" +
                     "</style>";
             this.isNightModeOn = true;
         }
