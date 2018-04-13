@@ -594,21 +594,23 @@ public class EpubFile {
     public void switchNightMode(boolean nightMode) {
         String CSS;
         if(nightMode == true) {
-            webView.setBackgroundColor(Color.parseColor("#424242"));
+            webView.setBackgroundColor(Color.parseColor("#212121"));
             CSS = "<style rel = \"stylesheet\" type = \"text/css\">" +
                     "body{" +
-                    "color: #e0e0e0;}" +
+                    "color: #757575;}" +
                     "a {" +
-                    "color: #e0e0e0;}" +
+                    "color: #757575;}" +
                     ".chapterHeader {" +
-                    "color: #e0e0e0;" +
-                    "background-color: #424242;}" +
+                    "color: #757575;" +
+                    "background-color: #212121;}" +
                     ".chapterHeader .translation{" +
-                    "color: #e0e0e0;" +
-                    "background-color: #424242;}" +
+                    "color: #757575;" +
+                    "background-color: #212121;}" +
                     ".chapterHeader .count{" +
-                    "color: #e0e0e0;" +
-                    "background-color: #424242;}" +
+                    "color: #757575;" +
+                    "background-color: #212121;}" +
+                    ".highlighted{" +
+                    "background-color: #004d40;}" +
                     "</style>";
             this.isNightModeOn = true;
         }
@@ -628,6 +630,8 @@ public class EpubFile {
                     ".chapterHeader .count{" +
                     "color: #000;" +
                     "background-color: #FFF;}" +
+                    ".highlighted{" +
+                    "background-color: #ccff90;}" +
                     "</style>";
             this.isNightModeOn = false;
         }
